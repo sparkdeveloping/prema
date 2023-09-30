@@ -30,6 +30,7 @@
 		DB6DC99F2AC8312400F381CF /* SideMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9872AC8312300F381CF /* SideMenu.swift */; };
 		DB6DC9A02AC8312400F381CF /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9882AC8312300F381CF /* MainView.swift */; };
 		DB6DC9A12AC8312400F381CF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9892AC8312300F381CF /* ContentView.swift */; };
+		DB6DC9A32AC8584800F381CF /* CommentAndShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9A22AC8584800F381CF /* CommentAndShareView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +59,7 @@
 		DB6DC9872AC8312300F381CF /* SideMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SideMenu.swift; sourceTree = "<group>"; };
 		DB6DC9882AC8312300F381CF /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		DB6DC9892AC8312300F381CF /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		DB6DC9A22AC8584800F381CF /* CommentAndShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentAndShareView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,14 +92,12 @@
 		DB2F8A212AB687F100713B5B /* prema */ = {
 			isa = PBXGroup;
 			children = (
-				DB6DC9752AC8311F00F381CF /* Assets.xcassets */,
+				DB6DC97A2AC8312100F381CF /* premaApp.swift */,
 				DB6DC9782AC8312100F381CF /* DataModels */,
 				DB6DC97F2AC8312200F381CF /* DirectView */,
 				DB6DC9822AC8312300F381CF /* FoundationViews */,
 				DB6DC96B2AC8311D00F381CF /* Managers */,
 				DB6DC9702AC8311F00F381CF /* PlayView */,
-				DB6DC97A2AC8312100F381CF /* premaApp.swift */,
-				DB6DC97D2AC8312200F381CF /* Preview Content */,
 				DB6DC96E2AC8311E00F381CF /* Profile */,
 				DB6DC9682AC8311C00F381CF /* RideView */,
 				DB6DC97B2AC8312100F381CF /* ShopperView */,
@@ -105,6 +105,8 @@
 				DB6DC96D2AC8311E00F381CF /* TransparentBlurView.swift */,
 				DB6DC9812AC8312300F381CF /* ViewExtensions.swift */,
 				DB6DC9672AC8311B00F381CF /* prema-Bridging-Header.h */,
+				DB6DC97D2AC8312200F381CF /* Preview Content */,
+				DB6DC9752AC8311F00F381CF /* Assets.xcassets */,
 			);
 			path = prema;
 			sourceTree = "<group>";
@@ -140,6 +142,7 @@
 				DB6DC9722AC8311F00F381CF /* PlayHomeView.swift */,
 				DB6DC9732AC8311F00F381CF /* PlayExploreView.swift */,
 				DB6DC9742AC8311F00F381CF /* PlayEventsView.swift */,
+				DB6DC9A22AC8584800F381CF /* CommentAndShareView.swift */,
 			);
 			path = PlayView;
 			sourceTree = "<group>";
@@ -273,6 +276,7 @@
 				DB6DC9A02AC8312400F381CF /* MainView.swift in Sources */,
 				DB6DC9922AC8312400F381CF /* PlayEventsView.swift in Sources */,
 				DB6DC99B2AC8312400F381CF /* BodyView.swift in Sources */,
+				DB6DC9A32AC8584800F381CF /* CommentAndShareView.swift in Sources */,
 				DB6DC9912AC8312400F381CF /* PlayExploreView.swift in Sources */,
 				DB6DC9952AC8312400F381CF /* PlayModel.swift in Sources */,
 				DB6DC99E2AC8312400F381CF /* TabbarViewX.swift in Sources */,

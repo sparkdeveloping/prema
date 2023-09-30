@@ -48,8 +48,7 @@ struct SideMenu: View {
                     .frame(maxWidth: getRect().width / 2, alignment: .leading)
                     
                     TabButton(module: .activity, animation: animation)
-                    Divider()
-                        .frame(maxWidth: getRect().width / 2, alignment: .leading)
+                
                 }
                 .padding(10)
                 .background(.regularMaterial)

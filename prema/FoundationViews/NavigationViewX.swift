@@ -67,14 +67,14 @@ struct PlayNavigationBarView: View {
                         } label: {
                             ZStack {
                                 if playModel.playHomeType == tab {
-                                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
                                         .fill(.orange.gradient)
                                         .matchedGeometryEffect(id: "selection1", in: namespace)
                                 }
                                 
                                 Text(tab.rawValue)
-                                    .font(.title3)
                                     .fontWeight(.bold)
+                                    .fontDesign(.rounded)
                                     .foregroundStyle(playModel.playHomeType == tab ? .white:.secondary)
                             }
                             .frame(maxWidth: .infinity)
@@ -82,7 +82,7 @@ struct PlayNavigationBarView: View {
                         }
                     }
                 }
-                .frame(height: 50)
+                .frame(height: 40)
             }
             ScrollView(.horizontal) {
                 HStack(alignment: .top) {
@@ -92,6 +92,7 @@ struct PlayNavigationBarView: View {
                                 
                             } label: {
                                 Text(tab)
+                                    .fontDesign(.rounded)
                                     .font(playModel.selectedInterest == tab ? .title2:.title3)
                                     .fontWeight(playModel.selectedInterest == tab ? .bold:.semibold)
                                     .foregroundStyle(playModel.selectedInterest == tab ? .orange:.secondary)
@@ -133,6 +134,7 @@ struct PlayNavigationBarView: View {
                             }
                             
                             Text(tab.rawValue)
+                                .fontDesign(.rounded)
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundStyle(playModel.playEventType == tab ? .white:.secondary)
@@ -142,7 +144,6 @@ struct PlayNavigationBarView: View {
                     }
                 }
             }
-            
             .frame(height: 50)
             
             ScrollView(.horizontal) {
