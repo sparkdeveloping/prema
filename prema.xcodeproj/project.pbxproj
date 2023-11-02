@@ -7,59 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		DB6DC98A2AC8312400F381CF /* RideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9692AC8311C00F381CF /* RideView.swift */; };
-		DB6DC98C2AC8312400F381CF /* NavigationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC96C2AC8311D00F381CF /* NavigationManager.swift */; };
-		DB6DC98D2AC8312400F381CF /* TransparentBlurView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC96D2AC8311E00F381CF /* TransparentBlurView.swift */; };
-		DB6DC98E2AC8312400F381CF /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC96F2AC8311E00F381CF /* ProfileView.swift */; };
-		DB6DC98F2AC8312400F381CF /* PlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9712AC8311F00F381CF /* PlayView.swift */; };
-		DB6DC9902AC8312400F381CF /* PlayHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9722AC8311F00F381CF /* PlayHomeView.swift */; };
-		DB6DC9912AC8312400F381CF /* PlayExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9732AC8311F00F381CF /* PlayExploreView.swift */; };
-		DB6DC9922AC8312400F381CF /* PlayEventsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9742AC8311F00F381CF /* PlayEventsView.swift */; };
+		DB0080F42AF4201B00C085C8 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0080F32AF4201B00C085C8 /* MainView.swift */; };
 		DB6DC9932AC8312400F381CF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DB6DC9752AC8311F00F381CF /* Assets.xcassets */; };
-		DB6DC9942AC8312400F381CF /* SupportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9772AC8312000F381CF /* SupportView.swift */; };
-		DB6DC9952AC8312400F381CF /* PlayModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9792AC8312100F381CF /* PlayModel.swift */; };
 		DB6DC9962AC8312400F381CF /* premaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC97A2AC8312100F381CF /* premaApp.swift */; };
-		DB6DC9972AC8312400F381CF /* ShopperView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC97C2AC8312100F381CF /* ShopperView.swift */; };
 		DB6DC9982AC8312400F381CF /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DB6DC97E2AC8312200F381CF /* Preview Assets.xcassets */; };
-		DB6DC9992AC8312400F381CF /* DirectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9802AC8312200F381CF /* DirectView.swift */; };
-		DB6DC99A2AC8312400F381CF /* ViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9812AC8312300F381CF /* ViewExtensions.swift */; };
-		DB6DC99B2AC8312400F381CF /* BodyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9832AC8312300F381CF /* BodyView.swift */; };
-		DB6DC99C2AC8312400F381CF /* TabButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9842AC8312300F381CF /* TabButton.swift */; };
-		DB6DC99D2AC8312400F381CF /* NavigationViewX.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9852AC8312300F381CF /* NavigationViewX.swift */; };
-		DB6DC99E2AC8312400F381CF /* TabbarViewX.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9862AC8312300F381CF /* TabbarViewX.swift */; };
-		DB6DC99F2AC8312400F381CF /* SideMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9872AC8312300F381CF /* SideMenu.swift */; };
-		DB6DC9A02AC8312400F381CF /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9882AC8312300F381CF /* MainView.swift */; };
-		DB6DC9A12AC8312400F381CF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9892AC8312300F381CF /* ContentView.swift */; };
-		DB6DC9A32AC8584800F381CF /* CommentAndShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC9A22AC8584800F381CF /* CommentAndShareView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DB0080F32AF4201B00C085C8 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		DB2F8A1F2AB687F100713B5B /* prema.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = prema.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB6DC9672AC8311B00F381CF /* prema-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "prema-Bridging-Header.h"; sourceTree = "<group>"; };
-		DB6DC9692AC8311C00F381CF /* RideView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RideView.swift; sourceTree = "<group>"; };
-		DB6DC96C2AC8311D00F381CF /* NavigationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavigationManager.swift; sourceTree = "<group>"; };
-		DB6DC96D2AC8311E00F381CF /* TransparentBlurView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransparentBlurView.swift; sourceTree = "<group>"; };
-		DB6DC96F2AC8311E00F381CF /* ProfileView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
-		DB6DC9712AC8311F00F381CF /* PlayView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayView.swift; sourceTree = "<group>"; };
-		DB6DC9722AC8311F00F381CF /* PlayHomeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayHomeView.swift; sourceTree = "<group>"; };
-		DB6DC9732AC8311F00F381CF /* PlayExploreView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayExploreView.swift; sourceTree = "<group>"; };
-		DB6DC9742AC8311F00F381CF /* PlayEventsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayEventsView.swift; sourceTree = "<group>"; };
 		DB6DC9752AC8311F00F381CF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		DB6DC9772AC8312000F381CF /* SupportView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SupportView.swift; sourceTree = "<group>"; };
-		DB6DC9792AC8312100F381CF /* PlayModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayModel.swift; sourceTree = "<group>"; };
 		DB6DC97A2AC8312100F381CF /* premaApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = premaApp.swift; sourceTree = "<group>"; };
-		DB6DC97C2AC8312100F381CF /* ShopperView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShopperView.swift; sourceTree = "<group>"; };
 		DB6DC97E2AC8312200F381CF /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		DB6DC9802AC8312200F381CF /* DirectView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DirectView.swift; sourceTree = "<group>"; };
-		DB6DC9812AC8312300F381CF /* ViewExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewExtensions.swift; sourceTree = "<group>"; };
-		DB6DC9832AC8312300F381CF /* BodyView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BodyView.swift; sourceTree = "<group>"; };
-		DB6DC9842AC8312300F381CF /* TabButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TabButton.swift; sourceTree = "<group>"; };
-		DB6DC9852AC8312300F381CF /* NavigationViewX.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavigationViewX.swift; sourceTree = "<group>"; };
-		DB6DC9862AC8312300F381CF /* TabbarViewX.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TabbarViewX.swift; sourceTree = "<group>"; };
-		DB6DC9872AC8312300F381CF /* SideMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SideMenu.swift; sourceTree = "<group>"; };
-		DB6DC9882AC8312300F381CF /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
-		DB6DC9892AC8312300F381CF /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		DB6DC9A22AC8584800F381CF /* CommentAndShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentAndShareView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,82 +53,12 @@
 			isa = PBXGroup;
 			children = (
 				DB6DC97A2AC8312100F381CF /* premaApp.swift */,
-				DB6DC9782AC8312100F381CF /* DataModels */,
-				DB6DC97F2AC8312200F381CF /* DirectView */,
-				DB6DC9822AC8312300F381CF /* FoundationViews */,
-				DB6DC96B2AC8311D00F381CF /* Managers */,
-				DB6DC9702AC8311F00F381CF /* PlayView */,
-				DB6DC96E2AC8311E00F381CF /* Profile */,
-				DB6DC9682AC8311C00F381CF /* RideView */,
-				DB6DC97B2AC8312100F381CF /* ShopperView */,
-				DB6DC9762AC8312000F381CF /* SupportView */,
-				DB6DC96D2AC8311E00F381CF /* TransparentBlurView.swift */,
-				DB6DC9812AC8312300F381CF /* ViewExtensions.swift */,
+				DB0080F32AF4201B00C085C8 /* MainView.swift */,
 				DB6DC9672AC8311B00F381CF /* prema-Bridging-Header.h */,
 				DB6DC97D2AC8312200F381CF /* Preview Content */,
 				DB6DC9752AC8311F00F381CF /* Assets.xcassets */,
 			);
 			path = prema;
-			sourceTree = "<group>";
-		};
-		DB6DC9682AC8311C00F381CF /* RideView */ = {
-			isa = PBXGroup;
-			children = (
-				DB6DC9692AC8311C00F381CF /* RideView.swift */,
-			);
-			path = RideView;
-			sourceTree = "<group>";
-		};
-		DB6DC96B2AC8311D00F381CF /* Managers */ = {
-			isa = PBXGroup;
-			children = (
-				DB6DC96C2AC8311D00F381CF /* NavigationManager.swift */,
-			);
-			path = Managers;
-			sourceTree = "<group>";
-		};
-		DB6DC96E2AC8311E00F381CF /* Profile */ = {
-			isa = PBXGroup;
-			children = (
-				DB6DC96F2AC8311E00F381CF /* ProfileView.swift */,
-			);
-			path = Profile;
-			sourceTree = "<group>";
-		};
-		DB6DC9702AC8311F00F381CF /* PlayView */ = {
-			isa = PBXGroup;
-			children = (
-				DB6DC9712AC8311F00F381CF /* PlayView.swift */,
-				DB6DC9722AC8311F00F381CF /* PlayHomeView.swift */,
-				DB6DC9732AC8311F00F381CF /* PlayExploreView.swift */,
-				DB6DC9742AC8311F00F381CF /* PlayEventsView.swift */,
-				DB6DC9A22AC8584800F381CF /* CommentAndShareView.swift */,
-			);
-			path = PlayView;
-			sourceTree = "<group>";
-		};
-		DB6DC9762AC8312000F381CF /* SupportView */ = {
-			isa = PBXGroup;
-			children = (
-				DB6DC9772AC8312000F381CF /* SupportView.swift */,
-			);
-			path = SupportView;
-			sourceTree = "<group>";
-		};
-		DB6DC9782AC8312100F381CF /* DataModels */ = {
-			isa = PBXGroup;
-			children = (
-				DB6DC9792AC8312100F381CF /* PlayModel.swift */,
-			);
-			path = DataModels;
-			sourceTree = "<group>";
-		};
-		DB6DC97B2AC8312100F381CF /* ShopperView */ = {
-			isa = PBXGroup;
-			children = (
-				DB6DC97C2AC8312100F381CF /* ShopperView.swift */,
-			);
-			path = ShopperView;
 			sourceTree = "<group>";
 		};
 		DB6DC97D2AC8312200F381CF /* Preview Content */ = {
@@ -177,28 +67,6 @@
 				DB6DC97E2AC8312200F381CF /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
-			sourceTree = "<group>";
-		};
-		DB6DC97F2AC8312200F381CF /* DirectView */ = {
-			isa = PBXGroup;
-			children = (
-				DB6DC9802AC8312200F381CF /* DirectView.swift */,
-			);
-			path = DirectView;
-			sourceTree = "<group>";
-		};
-		DB6DC9822AC8312300F381CF /* FoundationViews */ = {
-			isa = PBXGroup;
-			children = (
-				DB6DC9832AC8312300F381CF /* BodyView.swift */,
-				DB6DC9842AC8312300F381CF /* TabButton.swift */,
-				DB6DC9852AC8312300F381CF /* NavigationViewX.swift */,
-				DB6DC9862AC8312300F381CF /* TabbarViewX.swift */,
-				DB6DC9872AC8312300F381CF /* SideMenu.swift */,
-				DB6DC9882AC8312300F381CF /* MainView.swift */,
-				DB6DC9892AC8312300F381CF /* ContentView.swift */,
-			);
-			path = FoundationViews;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -272,28 +140,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DB6DC9942AC8312400F381CF /* SupportView.swift in Sources */,
-				DB6DC9A02AC8312400F381CF /* MainView.swift in Sources */,
-				DB6DC9922AC8312400F381CF /* PlayEventsView.swift in Sources */,
-				DB6DC99B2AC8312400F381CF /* BodyView.swift in Sources */,
-				DB6DC9A32AC8584800F381CF /* CommentAndShareView.swift in Sources */,
-				DB6DC9912AC8312400F381CF /* PlayExploreView.swift in Sources */,
-				DB6DC9952AC8312400F381CF /* PlayModel.swift in Sources */,
-				DB6DC99E2AC8312400F381CF /* TabbarViewX.swift in Sources */,
-				DB6DC99C2AC8312400F381CF /* TabButton.swift in Sources */,
-				DB6DC99F2AC8312400F381CF /* SideMenu.swift in Sources */,
-				DB6DC98F2AC8312400F381CF /* PlayView.swift in Sources */,
-				DB6DC98A2AC8312400F381CF /* RideView.swift in Sources */,
-				DB6DC9A12AC8312400F381CF /* ContentView.swift in Sources */,
-				DB6DC99D2AC8312400F381CF /* NavigationViewX.swift in Sources */,
 				DB6DC9962AC8312400F381CF /* premaApp.swift in Sources */,
-				DB6DC98E2AC8312400F381CF /* ProfileView.swift in Sources */,
-				DB6DC9972AC8312400F381CF /* ShopperView.swift in Sources */,
-				DB6DC98D2AC8312400F381CF /* TransparentBlurView.swift in Sources */,
-				DB6DC9992AC8312400F381CF /* DirectView.swift in Sources */,
-				DB6DC9902AC8312400F381CF /* PlayHomeView.swift in Sources */,
-				DB6DC99A2AC8312400F381CF /* ViewExtensions.swift in Sources */,
-				DB6DC98C2AC8312400F381CF /* NavigationManager.swift in Sources */,
+				DB0080F42AF4201B00C085C8 /* MainView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
