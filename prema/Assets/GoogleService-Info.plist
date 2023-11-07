@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>380320763785-mlrioevdi3pdfes0a1na6lslsljq2vuk.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.380320763785-mlrioevdi3pdfes0a1na6lslsljq2vuk</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>380320763785-9h85n3cgfgpv4pf2rlcbovc1mno1chra.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyB6k4HUzTrkn0Cva-vZTGzkjkae6jaTTDU</string>
+	<key>GCM_SENDER_ID</key>
+	<string>380320763785</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.sbj.prema</string>
+	<key>PROJECT_ID</key>
+	<string>elixer-sparkdev</string>
+	<key>STORAGE_BUCKET</key>
+	<string>elixer-sparkdev.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:380320763785:ios:6ae2a1acabaffd06201b58</string>
+	<key>DATABASE_URL</key>
+	<string>https://elixer-sparkdev.firebaseio.com</string>
+</dict>
+</plist>
