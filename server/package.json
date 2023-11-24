@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "algoliasearch": "^4.20.0",
-    "firebase-admin": "^11.11.0"
-  }
-}

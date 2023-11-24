@@ -17,7 +17,7 @@ enum ProfileType: String, Codable, Hashable {
 
 struct AuthView: View {
     @Environment(\.colorScheme) var colorScheme
-    @StateObject var appearance = AppearanceManager.shared
+    @EnvironmentObject var appearance: AppearanceManager
     @StateObject var accountsManager = AccountManager.shared
 
     @State var createProfile: Bool = false
@@ -89,7 +89,7 @@ struct AccountsView: View {
     @StateObject var accountsManager = AccountManager.shared
     @StateObject var authManager = AuthManager.shared
 
-    @StateObject var appearanceManager = AppearanceManager.shared
+    @EnvironmentObject var appearance: AppearanceManager
     @Environment(\.colorScheme) var colorScheme
     @State var selectedAccountIndex: Int = 0
    var selectedAccount: Account {
@@ -112,7 +112,7 @@ struct AccountsView: View {
     var body: some View {
       
             VStack {
-                if appearanceManager.isLoading {
+                if appearance.isLoading {
                     SpinnerView()
                         .frame(width: 80, height: 80)
                 } else {
@@ -284,9 +284,11 @@ struct AccountsView: View {
                     } else {
                         TabView {
                             ForEach(media) { item in
-                                Image(uiImage: item.uiImage)
-                                    .resizable()
-                                    .scaledToFill()
+                                if let uiImage = item.uiImage {
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .scaledToFill()
+                                }
                             }
                         }
                         .tabViewStyle(.page)
@@ -307,7 +309,7 @@ struct AccountsView: View {
                             items.forEach { item in
                                 var mediaa: Media?
                                 SwiftUI.Task {
-                                    await mediaa = Media(videoURLString: item.getURL()?.absoluteString, data: item.getURL() == nil ? item.getData():item.getThumbnailData(), type: item.type == .image ? .image:.video)
+                                    await mediaa = Media(videoURLString: item.getURL()?.absoluteString)
                                     if let mediaa {
                                         media.append(mediaa)
                                     }
@@ -402,14 +404,14 @@ struct AccountsView: View {
 struct AuthFormView: View {
     @Environment(\.colorScheme) var colorScheme
     @Binding var showAuth: Bool
-    @StateObject var appearanceManager = AppearanceManager.shared
+    @EnvironmentObject var appearance: AppearanceManager
     @StateObject var authManager: AuthManager = .shared
     var buttonEnabled: Bool {
         return (!authManager.email.isEmpty && !authManager.password.isEmpty)
     }
     var body: some View {
         ZStack {
-            if appearanceManager.isLoading {
+            if appearance.isLoading {
                 SpinnerView()
                     .frame(width: 80, height: 80)
             } else {
@@ -637,31 +639,18 @@ extension String {
     }
 }
 
-struct ImageX: View {
-    var url: URL?
-    init(_ urlString: String? = nil, url: URL? = nil) {
-        if let url {
-            self.url = url
-        } else {
-            self.url = URL(string: urlString ?? "")
-        }
-    }
-    var body: some View {
-        WebImage(url: url)
-            .resizable()
-            .aspectRatio(contentMode: .fill)
-    }
-}
-
 struct ProfileImageView: View {
     @Environment(\.colorScheme) var colorScheme
-    var avatars: [Media]
+    var avatars: [Media] = []
+    var avatarImageURL: String?
     var body: some View {
         GeometryReader {
             var size = $0.size
             
             ZStack {
-                if avatars.isEmpty {
+                if let avatarImageURL {
+                    ImageX(urlString: avatarImageURL)
+                } else if avatars.isEmpty {
                     Image("FullName")
                         .resizable()
                         .scaledToFit()
@@ -673,7 +662,7 @@ struct ProfileImageView: View {
                             if avatar.type == .video {
                                 
                             } else if let urlString = avatar.imageURLString {
-                                ImageX(urlString)
+                                ImageX(urlString: urlString)
                             }
                         }
                     }

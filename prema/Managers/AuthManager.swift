@@ -58,7 +58,6 @@ class AuthManager: ObservableObject {
                 onSuccess()
             }
             AppearanceManager.shared.stopLoading()
-        
         }
     }
     
@@ -101,39 +100,41 @@ class AuthManager: ObservableObject {
                 if let error {
                     self.error = error.localizedDescription
                 }
-                
-                StorageManager.uploadMedia(media: avatars, locationName: "avatars") { mediaDict in
-                    
-                    Firestore.firestore().collection("profiles").document(id).setData(
-                        ["media":mediaDict], merge: true)
-                    
-                    AccountManager.shared.fetchProfiles(id: accountID) { profiles in
-                        if let index = AccountManager.shared.accounts.firstIndex(where: {$0.id == accountID }) {
-                            AccountManager.shared.accounts[index].profiles = profiles
-                            if !profiles.isEmpty {
-                                withAnimation(.spring()) {
-                                    AccountManager.shared.currentProfile = profiles[0]
-                                }
-                            }
-                            AccountManager.shared.saveAccountsLocally()
-                        }
-                    }
+                if avatars.isEmpty {
                     AppearanceManager.shared.stopLoading()
-                } onError: { error in
-                    AccountManager.shared.fetchProfiles(id: accountID) { profiles in
-                        if let index = AccountManager.shared.accounts.firstIndex(where: {$0.id == accountID }) {
-                            AccountManager.shared.accounts[index].profiles = profiles
-                            if !profiles.isEmpty {
-                                withAnimation(.spring()) {
-                                    AccountManager.shared.currentProfile = profiles[0]
+                } else {
+                    StorageManager.uploadMedia(media: avatars, locationName: "avatars") { mediaDict in
+                        
+                        Firestore.firestore().collection("profiles").document(id).setData(
+                            ["avatars":mediaDict], merge: true)
+                        
+                        AccountManager.shared.fetchProfiles(id: accountID) { profiles in
+                            if let index = AccountManager.shared.accounts.firstIndex(where: {$0.id == accountID }) {
+                                AccountManager.shared.accounts[index].profiles = profiles
+                                if !profiles.isEmpty {
+                                    withAnimation(.spring()) {
+                                        AccountManager.shared.currentProfile = profiles[0]
+                                    }
                                 }
+                                AccountManager.shared.saveAccountsLocally()
                             }
-                            AccountManager.shared.saveAccountsLocally()
                         }
+                        AppearanceManager.shared.stopLoading()
+                    } onError: { error in
+                        AccountManager.shared.fetchProfiles(id: accountID) { profiles in
+                            if let index = AccountManager.shared.accounts.firstIndex(where: {$0.id == accountID }) {
+                                AccountManager.shared.accounts[index].profiles = profiles
+                                if !profiles.isEmpty {
+                                    withAnimation(.spring()) {
+                                        AccountManager.shared.currentProfile = profiles[0]
+                                    }
+                                }
+                                AccountManager.shared.saveAccountsLocally()
+                            }
+                        }
+                        AppearanceManager.shared.stopLoading()
                     }
-                    AppearanceManager.shared.stopLoading()
                 }
-
               
             }
     }

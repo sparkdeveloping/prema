@@ -11,6 +11,7 @@ import SwiftUI
 struct ProfileView: View {
     @Environment (\.safeAreaInsets) var safeAreaInsets
     @Environment (\.colorScheme) var colorScheme
+    @EnvironmentObject var appearance: AppearanceManager
 
     @StateObject var accountManager = AccountManager.shared
     @StateObject var authManager = AuthManager.shared
@@ -32,7 +33,8 @@ struct ProfileView: View {
                                                     withAnimation(.spring()) {
                                                         AccountManager.shared.currentProfile = profile
                                                     }
-                                                    AppearanceManager.shared.stopLoading()
+                                                    appearance.stopLoading()
+                                                    DirectManager.shared = .init()
                                                 }
                                             }
                                         } catch {}
@@ -57,7 +59,7 @@ struct ProfileView: View {
                     VStack(alignment: .leading, spacing: 20) {
                         HStack(spacing: 20) {
                             ProfileImageView(avatars: accountManager.currentProfile!.avatars)
-                                .frame(width: AppearanceManager.shared.size.width / 4, height: AppearanceManager.shared.size.width / 4)
+                                .frame(width: appearance.size.width / 4, height: appearance.size.width / 4)
                             VStack(alignment: .leading) {
                                 VStack(alignment: .leading) {
                                     Text("full name")

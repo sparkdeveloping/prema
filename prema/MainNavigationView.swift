@@ -8,7 +8,7 @@
 import SwiftUI
 
 enum Tab: String {
-    case profile = "Profile", play = "Play", direct = "Direct", shopper = "Shopper", bite = "Bite", ride = "Ride"
+    case profile = "Profile", play = "Play", direct = "Direct", shopper = "Shopper", bite = "Bite", ride = "Ride", camera = "Camera"
     static var allCases: [Self] = [.play, .direct, .shopper, .bite, .ride]
 }
 
@@ -17,9 +17,8 @@ enum Tab: String {
 struct MainNavigationView: View {
     @Environment (\.colorScheme) var colorScheme
     @StateObject var accountManager = AccountManager.shared
-    @StateObject var navigationManager = NavigationManager.shared
-
-    @State var showSidebar = true
+    @EnvironmentObject var navigation: NavigationManager
+    @StateObject var directManager = DirectManager.shared
     @Environment(\.safeAreaInsets) private var safeAreaInsets
 
     var body: some View {
@@ -27,68 +26,51 @@ struct MainNavigationView: View {
             let size = $0.size
             ZStack(alignment: .leading) {
                 HStack {
-                    Sidebar(selectedTab: $navigationManager.selectedTab)
-                        .offset(x: showSidebar ? 0:-size.width / 2)
+                    Sidebar(selectedTab: $navigation.selectedTab)
+                        .offset(x: navigation.showSidebar ? 0:-size.width / 2)
                     Color.clear
                 }
-                TabView(selection: $navigationManager.selectedTab) {
-                    
-                    SelfView()
-                        .tag(Tab.profile)
-                    Color.clear
-                        .tag(Tab.play)
-                    DirectView()
-                        .tag(Tab.direct)
-                    Color.clear
-                        .tag(Tab.shopper)
-                    Color.clear
-                        .tag(Tab.bite)
-                    Color.clear
-                        .tag(Tab.ride)
-                    
-                }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-                .nonVibrantBackground(cornerRadius: showSidebar ? 40:0, colorScheme: colorScheme)
-                .scaleEffect((showSidebar ? 0.7:1), anchor: .leading)
-                .offset(x: size.width * (showSidebar ? 0.6:0))
-               
-                VStack {
-                    
-                    Spacer()
-                    HStack {
-                        Image(showSidebar ? "Cancel":"Menu")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 20, height: 20)
-                            .rotationEffect(.radians(showSidebar ? .pi:0))
-                            .foregroundStyle(showSidebar ? .red:.secondary)
-                            .padding()
-                            .nonVibrantBackground(cornerRadius: 20, colorScheme: colorScheme)
-                            .onTapGesture {
-                                withAnimation(.spring()) {
-                                    showSidebar.toggle()
-                                }
-                            }
-                        HStack {
-                            ForEach(navigationManager.tabs, id: \.self) { tab in
-                                
-                                TabButton(imageName: tab)
-                            }
-                        }
-                        .frame(height: 60)
-                        .nonVibrantBackground(cornerRadius: 20, colorScheme: colorScheme)
-                      
+            
+                    TabView(selection: $navigation.selectedTab) {
+                        
+                        SelfView()
+                            .tag(Tab.profile)
+                        Color.clear
+                            .tag(Tab.play)
+                        DirectView()
+                            .tag(Tab.direct)
+                        ShopperView()
+                            .tag(Tab.shopper)
+                        Color.clear
+                            .tag(Tab.bite)
+                        RideView()
+                            .tag(Tab.ride)
+                        CameraView()
+                            .tag(Tab.camera)
+                        
                     }
-                    .padding()
-                    .bottomPadding(safeAreaInsets.bottom)
-                }
+                    .tabViewStyle(.page(indexDisplayMode: .never))
+                  
+                    .overlay(alignment: .topLeading) {
+                        if navigation.selectedTab != .camera {
+                            Image("logo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 80, height: 80)
+                                .saturation(0)
+                                .padding(40)
+                        }
+                    }
+                    .nonVibrantBackground(cornerRadius: navigation.showSidebar ? 40:0, colorScheme: colorScheme)
+                    .scaleEffect((navigation.showSidebar ? 0.7:1), anchor: .leading)
+                    .offset(x: size.width * (navigation.showSidebar ? 0.6:0))
+          
             }
-            .ignoresSafeArea()
             .frame(maxWidth: .infinity)
             .nonVibrantSecondaryBackground(cornerRadius: 0, colorScheme: colorScheme)
+                
+            }
         }
-    }
-    
 }
 
 struct TabButton: View {
@@ -103,10 +85,10 @@ struct TabButton: View {
             }
        
         case .direct:
-            if navigationManager.selectedDirectTab == "Feed" && imageName == "Feed" {
+            if navigationManager.selectedDirectTab == "DirectInbox" && imageName == "DirectInbox" {
                 return .create
             }
-            if navigationManager.selectedDirectTab == "Inbox" && imageName == "Inbox" {
+            if navigationManager.selectedDirectTab == "DirectInbox" && imageName == "DirectInbox" {
                 return .create
                 
             }
@@ -119,6 +101,7 @@ struct TabButton: View {
     var imageName: String
 
     @Environment (\.colorScheme) var colorScheme
+    @EnvironmentObject var appearance: AppearanceManager
 
     @StateObject var navigationManager = NavigationManager.shared
 
@@ -126,12 +109,20 @@ struct TabButton: View {
         switch navigationManager.selectedTab {
         case .profile:
             if navigationManager.selectedSelfTab == imageName  {
-                return AppearanceManager.shared.currentTheme.vibrantColors[0]
+                return appearance.currentTheme.vibrantColors[0]
             }
         case .direct:
                if (navigationManager.selectedDirectTab) == imageName {
-                   return AppearanceManager.shared.currentTheme.vibrantColors[0]
+                   return appearance.currentTheme.vibrantColors[0]
                }
+        case .shopper:
+            if (navigationManager.selectedShopperTab) == imageName {
+                return appearance.currentTheme.vibrantColors[0]
+            }
+        case .ride:
+            if (navigationManager.selectedRideTab) == imageName {
+                return appearance.currentTheme.vibrantColors[0]
+            }
         default:
             return .secondary
         }
@@ -154,9 +145,10 @@ struct TabButton: View {
              }
         case .direct:
             
-             if navigationManager.selectedDirectTab == "Inbox" && imageName == "Inbox" {
+             if navigationManager.selectedDirectTab == "DirectInbox" && imageName == "DirectInbox" {
                  withAnimation(.spring()) {
                      navigationManager.showNewInbox = true
+                     print("yess its being hit")
                  }
                  return
              }
@@ -164,7 +156,7 @@ struct TabButton: View {
              withAnimation(.spring()) {
                  navigationManager.selectedDirectTab = imageName
              }
-             if navigationManager.selectedDirectTab == "Feed" && imageName == "Feed" {
+             if navigationManager.selectedDirectTab == "DirectFeed" && imageName == "DirectFeed" {
                  withAnimation(.spring()) {
                      navigationManager.showNewFeed = true
                  }
@@ -174,6 +166,14 @@ struct TabButton: View {
              withAnimation(.spring()) {
                  navigationManager.selectedDirectTab = imageName
              }
+        case .shopper:
+            withAnimation(.spring()) {
+                navigationManager.selectedShopperTab = imageName
+            }
+        case .ride:
+            withAnimation(.spring()) {
+                navigationManager.selectedRideTab = imageName
+            }
         default:
             
              withAnimation(.spring()) {
@@ -223,6 +223,8 @@ struct Sidebar: View {
     @Environment (\.colorScheme) var colorScheme
     @Namespace var namespace
     @StateObject var accountManager = AccountManager.shared
+    @EnvironmentObject var appearance: AppearanceManager
+    @EnvironmentObject var navigation: NavigationManager
 
     var body: some View {
         VStack {
@@ -254,6 +256,7 @@ struct Sidebar: View {
             .onTapGesture {
                 withAnimation(.spring()) {
                     selectedTab = .profile
+                    navigation.showSidebar = false
                 }
             }
             
@@ -275,12 +278,13 @@ struct Sidebar: View {
                     .onTapGesture {
                         withAnimation(.spring()) {
                             selectedTab = tab
+                            navigation.showSidebar = false
                         }
                     }
                     .background {
                         if selectedTab == tab {
                             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .fill(AppearanceManager.shared.currentTheme .vibrantGradient)
+                                .fill(appearance.currentTheme .vibrantGradient)
                                 .shadow(color: Color("Shadoww"), radius: 20, x: 4, y: 10)
                                 .matchedGeometryEffect(id: "namespace", in: namespace)
                         }
@@ -289,6 +293,37 @@ struct Sidebar: View {
             }
             .buttonPadding()
             .nonVibrantBackground(cornerRadius: 20, colorScheme: colorScheme)
+            HStack {
+                Image("Camera")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 20, height: 20)
+                    .padding(7)
+                    .nonVibrantSecondaryBackground(cornerRadius: 12, colorScheme: colorScheme)
+                Text("Camera")
+                    .bold()
+                    .roundedFont()
+                Spacer()
+            }
+            .foregroundStyle(selectedTab == .camera ? .white:.primary)
+            .padding(7)
+            .background {
+                if selectedTab == .camera {
+                    Color.clear
+                        .vibrantBackground(cornerRadius: 14, colorScheme: colorScheme)
+                        .matchedGeometryEffect(id: "namespace", in: namespace)
+                } else {
+                    Color.clear.nonVibrantBackground(cornerRadius: 20, colorScheme: colorScheme)
+                }
+            }
+            .bottomPadding()
+            .onTapGesture {
+                withAnimation(.spring()) {
+                    selectedTab = .camera
+                    navigation.showSidebar = false
+                }
+            }
+            
             Spacer()
             HStack {
                 Image("Accounts")

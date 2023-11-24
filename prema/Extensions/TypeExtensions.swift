@@ -25,14 +25,14 @@ extension Color {
     static var vibrant: LinearGradient {
         return AppearanceManager.shared.currentTheme.vibrantGradient
     }
-    static var nonVibrant: LinearGradient {
-        return AppearanceManager.shared.currentTheme.nonVibrantGradient
+    static func nonVibrant(_ colorScheme: ColorScheme) -> LinearGradient {
+        return colorScheme == .light ? AppearanceManager.shared.currentTheme.nonVibrantGradient:AppearanceManager.shared.currentTheme.nonVibrantGradientDark
     }
     static var vibrantSecondary: LinearGradient {
         return AppearanceManager.shared.currentTheme.vibrantSecondaryGradient
     }
-    static var nonVibrantSecondary: LinearGradient {
-        return AppearanceManager.shared.currentTheme.nonVibrantSecondaryGradient
+    static func nonVibrantSecondary(_ colorScheme: ColorScheme) -> LinearGradient {
+        return colorScheme == .light ? AppearanceManager.shared.currentTheme.nonVibrantSecondaryGradient:AppearanceManager.shared.currentTheme.nonVibrantSecondaryGradientDark
     }
 }
 

@@ -13,6 +13,7 @@ struct VisionsView: View {
     @Environment (\.colorScheme) var colorScheme
     @Environment (\.safeAreaInsets) var safeAreaInsets
     @StateObject var navigationManager = NavigationManager.shared
+    @EnvironmentObject var appearance: AppearanceManager
 
     var body: some View {
         ZStack {
@@ -54,13 +55,13 @@ struct VisionsView: View {
                 .opacity(navigationManager.showNewVision ? 0.9:0)
                 .ignoresSafeArea()
             NewVisionView()
-                .offset(y: navigationManager.showNewVision  ? 0:AppearanceManager.shared.size.height)
+                .offset(y: navigationManager.showNewVision  ? 0:appearance.size.height)
         }
     }
 }
 
 struct NewVisionView: View {
-    @StateObject var appearanceManager = AppearanceManager.shared
+    @EnvironmentObject var appearance: AppearanceManager
     @StateObject var navigationManager = NavigationManager.shared
     @Environment (\.colorScheme) var colorScheme
     @State var id: String = ""
@@ -79,7 +80,7 @@ struct NewVisionView: View {
     var body: some View {
  
         ZStack {
-            if appearanceManager.isLoading {
+            if appearance.isLoading {
                 SpinnerView()
                     .frame(width: 80, height: 80)
             } else {
@@ -170,28 +171,34 @@ struct CustomSelectorView: View {
     @Binding var selection: String
     @Environment (\.colorScheme) var colorScheme
     var strings: [String]
+    @Namespace var namespace
     var body: some View {
-        HStack {
-            ForEach(strings, id: \.self) { string in
-                Button {
-                    withAnimation(.spring) {
-                        selection = string
-                    }
-                } label: {
-                Text(string)
-                    .bold()
-                    .roundedFont()
-                    .buttonPadding(5)
-                    .foregroundStyle(selection == string ? .white:Color.primary)
-                    .background {
-                        if selection == string {
-                            Color.clear
-                                .vibrantBackground(cornerRadius: 10, colorScheme: colorScheme)
+        ScrollView(.horizontal) {
+            HStack {
+                ForEach(strings, id: \.self) { string in
+                    Button {
+                        withAnimation(.spring) {
+                            selection = string
                         }
+                    } label: {
+                        Text(string)
+                            .bold()
+                            .roundedFont()
+                            .buttonPadding(5)
+                            .foregroundStyle(selection == string ? .white:Color.primary)
+                            .background {
+                                if selection == string {
+                                    Color.clear
+                                        .vibrantBackground(cornerRadius: 12, colorScheme: colorScheme)
+                                        .matchedGeometryEffect(id: "namespace", in: namespace)
+                                }
+                            }
+                            .contentShape(.rect)
                     }
-                    .contentShape(.rect)
+                }
             }
-            }
+            .padding(10)
         }
+        .scrollIndicators(.hidden)
     }
 }

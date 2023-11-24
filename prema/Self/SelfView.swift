@@ -11,13 +11,13 @@ import SwiftUI
 struct SelfView: View {
     @Environment (\.safeAreaInsets) var safeAreaInsets
     @Environment (\.colorScheme) var colorScheme
-    @StateObject var navigationManager = NavigationManager.shared
+    @EnvironmentObject var navigation: NavigationManager
 
     @StateObject var accountManager = AccountManager.shared
     @StateObject var authManager = AuthManager.shared
 
     var body: some View {
-        TabView(selection: $navigationManager.selectedSelfTab) {
+        TabView(selection: $navigation.selectedSelfTab) {
             ProfileView()
                 .tag("FullName")
             VisionsView()

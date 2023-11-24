@@ -21,7 +21,7 @@ class StorageManager {
             switch item.type {
                 
             case .image:
-                if let data = item.data {
+                if let data = item.uiImage?.pngData() {
                     self.uploadImageToFirebaseStorage(location: locationName, imageData: data, imageName: item.id) { urlString in
                         
                         dict.append(["imageURL":urlString])
@@ -37,7 +37,7 @@ class StorageManager {
                 if let urlString = item.videoURLString, let url = URL(string: urlString) {
                     self.uploadVideoOrAudioToFirebaseStorage(location: locationName, videoURL: url, videoName: item.id) { url in
                         
-                        if let data = item.data {
+                        if let data = item.uiImage?.pngData() {
                             self.uploadImageToFirebaseStorage(location: locationName, imageData: data, imageName: item.id) { urlString in
                                 
                                 dict.append(["imageURL":urlString, "videoURL":url])

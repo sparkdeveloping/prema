@@ -5,29 +5,89 @@
 //  Created by Denzel Nyatsanza on 11/2/23.
 //
 
+import FirebaseMessaging
 import SwiftUI
 
 struct MainView: View {
-    @StateObject var appearance = AppearanceManager.shared
+    @EnvironmentObject var appearance: AppearanceManager
+    @EnvironmentObject var navigation: NavigationManager
+
     @StateObject var accountManager = AccountManager.shared
+    @Environment(\.safeAreaInsets) var safeAreaInsets
     @Environment(\.colorScheme) var colorScheme
-    
+
+    @StateObject var directManager = DirectManager.shared
+
     @State var appeared = false
     @State var size: CGSize = .zero
     init() {
         // Register your custom font
         UIFont.registerFontWithFilenameString("alba.ttf")
+        NamespaceWrapper.shared.namespace = namespace
+        if let profile = accountManager.currentProfile {
+            let topic = profile.id + "direct"
+            Messaging.messaging().subscribe(toTopic: topic) { error in
+              print("Subscribed to topic ")
+                print("\n\n\ntopic is: \(topic)\n\n\n")
+            }
+        }
     }
+    @Namespace var namespace
+
+
     var body: some View {
         GeometryReader {
             let size = $0.size
             ZStack {
                 SplashView()
                     .opacity(appearance.shrinkBlob ? 0.1:1)
+                    .environmentObject(appearance)
                 if accountManager.currentProfile == nil {
                     AuthView()
+                        .environmentObject(appearance)
                 } else {
-                    MainNavigationView()
+                    NavigationStack(path: $navigation.path) {
+                        MainNavigationView()
+                            .navigationBarBackButtonHidden()
+                            .ignoresSafeArea()
+                            .environmentObject(appearance)
+                            .navigationDestination(for: Inbox.self) { inbox in
+                                ChatView(inbox: inbox)
+                            }
+                        
+                    }
+                    .overlay(alignment: .bottom) {
+                        
+                            HStack {
+                                Image(navigation.showSidebar ? "Cancel":"Menu")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 20, height: 20)
+                                    .rotationEffect(.radians(navigation.showSidebar ? .pi:0))
+                                    .foregroundStyle(navigation.showSidebar ? .red:.secondary)
+                                    .padding()
+                                    .nonVibrantBackground(cornerRadius: 20, colorScheme: colorScheme)
+                                    .onTapGesture {
+                                        withAnimation(.spring()) {
+                                            navigation.showSidebar.toggle()
+                                        }
+                                    }
+                                HStack {
+                                    ForEach(navigation.tabs, id: \.self) { tab in
+                                        TabButton(imageName: tab)
+                                    }
+                                }
+                                .frame(height: 60)
+                                .nonVibrantBackground(cornerRadius: 20, colorScheme: colorScheme)
+                                if navigation.selectedTab == .camera {
+                                    Spacer()
+                                }
+                                
+                            }
+                            .offset(y: navigation.path.isEmpty ? 0: 100)
+                            .bottomPadding(safeAreaInsets.bottom)
+                            .horizontalPadding()
+                    }
                 }
                 
             }
@@ -35,20 +95,16 @@ struct MainView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .overlay(alignment: .topLeading) {
                 blob
-                  
             }
             .onAppear {
                 self.size = size
-
                 appearance.size = size
-   
-                withAnimation(.spring()) {
+                   withAnimation(.spring()) {
                     appeared = true
                 }
             }
         }
         .ignoresSafeArea()
-        
     }
     
     var blob: some View {
@@ -56,17 +112,37 @@ struct MainView: View {
             .foregroundStyle(Color.vibrant)
             .frame(width: self.size.width * 0.6, height: self.size.width * 0.6 * 247 / 277)
             .overlay(alignment: .leading) {
-                Text("prema")
-                    .font(.logoFont(self.size.width / 10))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 40)
+                ZStack {
+                    if navigation.path.isEmpty {
+                        Text("prema")
+                            .font(.logoFont(self.size.width / 10))
+                            .foregroundStyle(.white)
+                    } else {
+                        Image(systemName: "xmark")
+                            .font(.largeTitle.bold())
+                            .foregroundStyle(.white)
+                            .padding(20)
+                            .topPadding(20)
+                            .onTapGesture {
+                                navigation.path.removeLast()
+                            }
+                    }
+                }
+                .padding(.horizontal, 40)
             }
             .offset(x: appeared ? 0:-self.size.width * 0.6, y: appeared ? 0:-self.size.width * 0.6 * 247 / 277)
             .scaleEffect(appearance.shrinkBlob || !accountManager.accounts.isEmpty ? 0.7:1, anchor: .topLeading)
-        
+            .offset(y: navigation.selectedTab == .camera ? -self.size.width * 0.6 * 247 / 277:0)
     }
 }
 
-extension Double {
-    static var blobHeight = (AppearanceManager.shared.size.width * 0.6 * 247 / 277)
+
+class NamespaceWrapper: ObservableObject {
+    internal init(namespace: Namespace.ID? = nil) {
+        self.namespace = namespace
+    }
+    
+    var namespace: Namespace.ID? = nil
+    static var shared = NamespaceWrapper()
+    
 }
