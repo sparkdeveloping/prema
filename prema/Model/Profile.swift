@@ -25,6 +25,13 @@ struct ActivityStatus {
 }
 
 struct Profile: Identifiable, Codable, Hashable {
+    static func == (lhs: Profile, rhs: Profile) -> Bool {
+        lhs.id == rhs.id
+    }
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
     var id: String = UUID().uuidString
     var fullName: String = "Empty Name"
     var username: String = "premauser"
@@ -36,6 +43,7 @@ struct Profile: Identifiable, Codable, Hashable {
     var type: ProfileType = .none
     var privacy: Privacy = .public
     var settings: Settings = Self.defaultSettings
+    var visions: [Vision] = []
     
     static var defaultSettings = Settings(allowedNotifications: ["general" ,"direct"])
 }
@@ -98,8 +106,10 @@ extension [Profile] {
         let membs = self + [AccountManager.shared.currentProfile ?? .init()]
         let sortedArray = membs.map {$0.id}.sorted()
         let concatenatedString = sortedArray.joined()
+        
+        
         print("accepts id: \(concatenatedString)")
-        return Inbox(id: concatenatedString, members: membs, requests: self.map { $0.id }, accepts: [], recentMessage: nil, creationTimestamp: .init(id: UUID().uuidString, profile: AccountManager.shared.currentProfile ?? .init(), time: Date.now.timeIntervalSince1970), unreadDict: [:])
+        return Inbox(id: concatenatedString, members: membs, requests: self.map { $0.id }, accepts: [], displayName: membs.map { $0.username }.reduce("") { "\($0), " + $1 }, recentMessage: nil, creationTimestamp: .init(id: UUID().uuidString, profile: AccountManager.shared.currentProfile ?? .init(), time: Date.now.timeIntervalSince1970), unreadDict: [:])
     }
 }
 

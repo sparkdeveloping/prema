@@ -49,8 +49,10 @@ class AuthManager: ObservableObject {
             if let result {
                 let user = result.user
                 let account = Account(id: user.uid, email: user.email ?? "noemail@prema.com", creationTimestamp: user.metadata.creationDate?.timeIntervalSince1970 ?? 0, lastLoginTimestamp: user.metadata.lastSignInDate?.timeIntervalSince1970 ?? 0)
-                withAnimation(.spring()) {
-                    AccountManager.shared.accounts.insert(account, at: 0)
+                if !AccountManager.shared.accounts.contains(account) {
+                    withAnimation(.spring()) {
+                        AccountManager.shared.accounts.insert(account, at: 0)
+                    }
                 }
                 if let encryptedString = EncryptionUtility.encryptString(passwordd, uid: result.user.uid) {
                     UserDefaults.standard.set(encryptedString, forKey: result.user.uid + "ep")
@@ -71,8 +73,10 @@ class AuthManager: ObservableObject {
             if let result {
                 let user = result.user
                 let account = Account(id: user.uid, email: user.email ?? "noemail@prema.com", creationTimestamp: user.metadata.creationDate?.timeIntervalSince1970 ?? 0, lastLoginTimestamp: user.metadata.lastSignInDate?.timeIntervalSince1970 ?? 0)
-                withAnimation(.spring()) {
-                    AccountManager.shared.accounts.insert(account, at: 0)
+                if !AccountManager.shared.accounts.contains(account) {
+                    withAnimation(.spring()) {
+                        AccountManager.shared.accounts.insert(account, at: 0)
+                    }
                 }
                 if let encryptedString = EncryptionUtility.encryptString(self.password, uid: result.user.uid) {
                     UserDefaults.standard.set(encryptedString, forKey: result.user.uid + "ep")

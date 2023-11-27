@@ -19,7 +19,7 @@ class AppearanceManager: ObservableObject {
     @Published var hideTopBar = false
     @Published var currentThemeIndex: Int = 0
     
-    var themes: [Theme] = [Theme.defaultTheme]
+    var themes: [Theme] = [Theme.defaultTheme, .asterid, .beast, .coconatt, .knowel, .saculent, .swift]
         
     @Published var shrinkBlob = false
     @Published var isLoading = false
@@ -117,12 +117,13 @@ public class KeyboardInfo: ObservableObject {
 
 struct KeyboardAware: ViewModifier {
     @ObservedObject private var keyboard = KeyboardInfo.shared
-
+    @Environment (\.safeAreaInsets) var safeAreaInsets
     func body(content: Content) -> some View {
         content
             .padding(.bottom, self.keyboard.height)
+            .ignoresSafeArea()
             .edgesIgnoringSafeArea(self.keyboard.height > 0 ? .bottom : [])
-            .animation(.easeOut)
+            .animation(.easeInOut, value: self.keyboard.height)
     }
 }
 

@@ -66,6 +66,13 @@ struct Theme: Identifiable, Codable {
     
     
     static var defaultTheme: Theme = .init(name: "Default", vibrantHexes: ["7C00DD", "FF004D"], nonVibrantHexes: ["FFFFFF"], nonVibrantHexesDark: ["000000"], vibrantSecondaryHexes: ["FF004D"], nonVibrantSecondaryHexes: ["F0F0F0"], nonVibrantSecondaryHexesDark: ["1A1A1A"])
+    
+    static var asterid: Theme = .init(name: "Asterid", vibrantHexes: ["5200FF", "9E00FF"], nonVibrantHexes: ["FFFFFF"], nonVibrantHexesDark: ["000000"], vibrantSecondaryHexes: ["9E00FF"], nonVibrantSecondaryHexes: ["F0F0F0"], nonVibrantSecondaryHexesDark: ["1A1A1A"])
+    static var coconatt: Theme = .init(name: "Coconatt", vibrantHexes: ["A14400", "E3AD46"], nonVibrantHexes: ["FFFFFF"], nonVibrantHexesDark: ["000000"], vibrantSecondaryHexes: ["E3AD46"], nonVibrantSecondaryHexes: ["F0F0F0"], nonVibrantSecondaryHexesDark: ["1A1A1A"])
+    static var swift: Theme = .init(name: "Swift", vibrantHexes: ["FF4D00", "FFB800"], nonVibrantHexes: ["FFFFFF"], nonVibrantHexesDark: ["000000"], vibrantSecondaryHexes: ["FFB800"], nonVibrantSecondaryHexes: ["F0F0F0"], nonVibrantSecondaryHexesDark: ["1A1A1A"])
+    static var saculent: Theme = .init(name: "Saculent", vibrantHexes: ["00D13B", "00FF85"], nonVibrantHexes: ["FFFFFF"], nonVibrantHexesDark: ["000000"], vibrantSecondaryHexes: ["00FF85"], nonVibrantSecondaryHexes: ["F0F0F0"], nonVibrantSecondaryHexesDark: ["1A1A1A"])
+    static var beast: Theme = .init(name: "Beast", vibrantHexes: ["D10000", "FF3D00"], nonVibrantHexes: ["FFFFFF"], nonVibrantHexesDark: ["000000"], vibrantSecondaryHexes: ["FF3D00"], nonVibrantSecondaryHexes: ["F0F0F0"], nonVibrantSecondaryHexesDark: ["1A1A1A"])
+    static var knowel: Theme = .init(name: "Knowel", vibrantHexes: ["0047FF", "00B2FF"], nonVibrantHexes: ["FFFFFF"], nonVibrantHexesDark: ["000000"], vibrantSecondaryHexes: ["0047FF"], nonVibrantSecondaryHexes: ["F0F0F0"], nonVibrantSecondaryHexesDark: ["1A1A1A"])
 }
 
 extension [String: Any] {

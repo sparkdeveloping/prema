@@ -9,7 +9,7 @@ import SwiftUI
 
 extension ShopperView {
     struct ShopperHome: View {
-        @StateObject var shopper = ShopperManager()
+        @EnvironmentObject var shopper: ShopperManager
         @State var category = "recommended"
         @Environment (\.safeAreaInsets) var safeAreaInsets
         @Environment (\.colorScheme) var colorScheme
@@ -61,6 +61,25 @@ extension ShopperView {
                 .bottomPadding(safeAreaInsets.bottom + 100)
             }
             .ignoresSafeArea()
+            .overlay(alignment: .topTrailing) {
+                HStack {
+                    Image(systemName: "heart.fill")
+                        .font(.title2.bold())
+                    Divider()
+                        .frame(height: 20)
+                        .horizontalPadding(4)
+                    Image(systemName: "magnifyingglass")
+                        .font(.title2.bold())
+                }
+                .frame(height: 40)
+                .foregroundStyle(Color.vibrant)
+                .buttonPadding()
+                .background(.regularMaterial)
+                .clipShape(.rect(cornerRadius: 20, style: .continuous))
+                .padding(.trailing)
+                .topPadding(safeAreaInsets.top)
+                .ignoresSafeArea()
+            }
         }
     }
 }
@@ -117,7 +136,7 @@ struct ProductCell: View {
                         }
                     }
                 } label: {
-                    Label(shopper.cart.contains(where: {$0.id == product.id }) ? "Remove:":"Add to Cart", systemImage: shopper.cart.contains(where: {$0.id == product.id }) ? "cart.fill.badge.minus":"cart.fill.badge.plus")
+                    Label(shopper.cart.contains(where: {$0.id == product.id }) ? "Remove":"Add to Cart", systemImage: shopper.cart.contains(where: {$0.id == product.id }) ? "cart.fill.badge.minus":"cart.fill.badge.plus")
                         .fontWeight(.bold)
                         .foregroundStyle(.white)
                         .padding(10)
@@ -126,9 +145,10 @@ struct ProductCell: View {
                             if shopper.cart.contains(where: {$0.id == product.id }) {
                                 Color.red
                             } else {
-                                Color.clear.vibrantBackground(cornerRadius: 14, colorScheme: colorScheme)
+                                Color.clear.vibrantBackground(cornerRadius: 0, colorScheme: colorScheme)
                             }
                         }
+                        .clipShape(.rect(cornerRadius: 14, style: .continuous))
                 }
                 Image(systemName: "heart.fill")
                     .fontWeight(.bold)

@@ -91,7 +91,7 @@ class ChatManager: ObservableObject {
     
     func sendMessage() {
         if let profile = AccountManager.shared.currentProfile {
-            let batch = db.batch()
+        
             print("\n\n\n sending 1 \n\n\n\n")
             let id = db.collection("messages").document().documentID
             print("\n\n\n sending 2 \n\n\n\n")
@@ -107,23 +107,43 @@ class ChatManager: ObservableObject {
             
             print("\n\n\n sending 5 \n\n\n\n \(self.inbox.dictionary.parseInbox().dictionary)")
 
+            var inboxDict = inbox.dictionary
+            var messageDict = message.dictionary
             print("\n\n\n sending 6 \n\n\n\n")
-            batch.setData(inbox.dictionary, forDocument: db.collection("inbox").document(self.inbox.id), merge: true)
-
-            print("\n\n\n sending 7 \n\n\n\n")
-            batch.setData(message.dictionary, forDocument: db.collection("inbox").document(inbox.id).collection("messages").document(id), merge: true)
-            print("\n\n\n sending 8 \n\n\n\n")
-            // Commit the batch
-
-            batch.commit { (error) in
-                if let error = error {
-                    print("Error writing batch: \(error.localizedDescription)")
-                } else {
-                    print("Batch write successful")
-                    inbox.notifications.processAndSendNotifications()
+            
+            if media.isEmpty {
+                self.finalizeMessage(id: id, inboxDict: inboxDict, messageDict: messageDict)
+            } else {
+                StorageManager.uploadMedia(media: media, locationName: "direct") { dict in
+                    messageDict["media"] = dict
+                    self.finalizeMessage(id: id, inboxDict: inboxDict, messageDict: messageDict)
+                } onError: { error in
+                    message.isMessageSendError = true
                 }
+
             }
+            
+           
             self.inbox = inbox.dictionary.parseInbox()
+        }
+    }
+    
+    func finalizeMessage(id: String, inboxDict: [String: Any], messageDict: [String: Any]) {
+        let batch = db.batch()
+        batch.setData(inboxDict, forDocument: db.collection("inbox").document(self.inbox.id), merge: true)
+
+        print("\n\n\n sending 7 \n\n\n\n")
+        batch.setData(messageDict, forDocument: db.collection("inbox").document(inbox.id).collection("messages").document(id), merge: true)
+        print("\n\n\n sending 8 \n\n\n\n")
+        // Commit the batch
+
+        batch.commit { (error) in
+            if let error = error {
+                print("Error writing batch: \(error.localizedDescription)")
+            } else {
+                print("Batch write successful")
+                inboxDict.parseInbox().notifications.processAndSendNotifications()
+            }
         }
     }
     

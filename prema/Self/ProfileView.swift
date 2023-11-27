@@ -92,6 +92,8 @@ struct ProfileView: View {
                             Text(accountManager.currentProfile!.bio)
                                 .fontWeight(.bold)
                                 .frame(maxWidth: .infinity)
+                                .multilineTextAlignment(.leading)
+                            
                             
                         }
                         
@@ -120,9 +122,33 @@ struct ProfileView: View {
                     .padding()
                     
                     VStack {
-                        Color.clear
+                        
+                        VStack {
+                            Text("prema score")
+                            Text("328")
+                                .font(.largeTitle.bold())
+                        }
+                        .verticalPadding(20)
+                        HStack {
+                            Color.clear
+                            CircularProgressView(progress: 0.5)
+                            Color.clear
+                            CircularProgressView(progress: 0.2)
+                            Color.clear
+                        }
+                        HStack {
+                            Color.clear
+                            CircularProgressView(progress: 0.5)
+                            Color.clear
+                            CircularProgressView(progress: 0.2)
+                            Color.clear
+                            CircularProgressView(progress: 0.2)
+                            Color.clear
+                        }
                     }
                     .padding()
+                    .padding(.bottom, safeAreaInsets.bottom + 80)
+
                     .nonVibrantBackground(cornerRadius: 30, colorScheme: colorScheme)
                     
                 }
@@ -140,5 +166,32 @@ extension Double {
         dateFormatter.dateFormat = "MMMM d, yyyy"
         
         return dateFormatter.string(from: date)
+    }
+}
+
+struct CircularProgressView: View {
+    let progress: Double
+    @StateObject var appearance = AppearanceManager.shared
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(
+                    Color.pink.opacity(0.5),
+                    lineWidth: 14
+                )
+            Circle()
+                .trim(from: 0, to: progress)
+                .stroke(
+                    appearance.currentTheme.vibrantGradient,
+                    style: StrokeStyle(
+                        lineWidth: 14,
+                        lineCap: .round
+                    )
+                )
+                .rotationEffect(.degrees(-90))
+                // 1
+                .animation(.easeOut, value: progress)
+
+        }
     }
 }

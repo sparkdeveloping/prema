@@ -13,6 +13,7 @@ class ShopperManager: ObservableObject {
     @Published var products: [Product] = ShopperManager.dummyProducts
     @Published var cart: [Product] = []
 
+    static var shared = ShopperManager()
     static var dummyProducts: [Product] = [
     
         .init(name: "Summer Glasses", description: "This is a description for sun glasses to see how they will look ", avatars: [.init(uiImage: UIImage(named: "sunglasses"))], price: 29.99, comparisonPrice: 40.57, availableStock: 100),

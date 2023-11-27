@@ -291,33 +291,14 @@ struct AccountsView: View {
                                 }
                             }
                         }
-                        .tabViewStyle(.page)
+                        .tabViewStyle(.page(indexDisplayMode: .never))
                         .frame(width: 100, height: 100)
                     }
                 }
                 .frame(width: 100, height: 100)
-                .onTapGesture {
-                    withAnimation(.spring()) {
-                        showPicker = true
-                    }
-                }
-                .sheet(isPresented: $showPicker) {
-                    MediaPicker(
-                        isPresented: $showPicker,
-                        onChange: { items in
-                            
-                            items.forEach { item in
-                                var mediaa: Media?
-                                SwiftUI.Task {
-                                    await mediaa = Media(videoURLString: item.getURL()?.absoluteString)
-                                    if let mediaa {
-                                        media.append(mediaa)
-                                    }
-                                }
-                            }
-                            
-                        }
-                    )
+                .showMediaPicker(isPresented: $showPicker, type: .profile_avatar) { mediaa in
+                    media = mediaa
+                    
                 }
             
             .frame(width: 100, height: 100)
@@ -603,18 +584,19 @@ extension View {
 }
 
 struct SpinnerView: View {
+    
     @State private var isAnimating = false
     
     var body: some View {
         Circle()
             .trim(from: 0, to: 0.7)
-            .stroke(
-                AppearanceManager.shared.currentTheme.vibrantGradient,
-                lineWidth: 5
-            )
+            .stroke(AppearanceManager.shared.currentTheme.vibrantGradient,
+                    style: .init(lineWidth: 5,
+                                 lineCap: .round,
+                                 lineJoin: .round))
             .frame(width: 50, height: 50)
             .rotationEffect(.degrees(isAnimating ? 360 : 0))
-            .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false))
+            .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false), value: isAnimating)
             .onAppear() {
                 self.isAnimating = true
             }
@@ -666,7 +648,7 @@ struct ProfileImageView: View {
                             }
                         }
                     }
-                    .tabViewStyle(.page)
+                    .tabViewStyle(.page(indexDisplayMode: .never))
                     .frame(width: size.width, height: size.width)
                     .clipShape(RoundedRectangle(cornerRadius: size.width / 3, style: .continuous))
                     .clipped()

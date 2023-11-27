@@ -114,7 +114,7 @@ class DirectManager: ObservableObject {
     }
     
     func retrieveTempProfiles(completion: @escaping([Profile]) -> ()) {
-        Firestore.firestore().collection("profiles").limit(toLast: 50).getDocuments { snapshot, error in
+        Firestore.firestore().collection("profiles").limit(to: 50).getDocuments { snapshot, error in
             if let error {
                 completion([])
             }
@@ -130,6 +130,7 @@ class DirectManager: ObservableObject {
                 completion(p)
                 return
             }
+            return
         }
 
         let index = client.index(withName: "profiles")

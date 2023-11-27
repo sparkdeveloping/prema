@@ -85,6 +85,7 @@
 		DBB051552B05DF0F0008A002 /* DSWaveformImageViews in Frameworks */ = {isa = PBXBuildFile; productRef = DBB051542B05DF0F0008A002 /* DSWaveformImageViews */; };
 		DBB051582B05E09D0008A002 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBB051562B05E09C0008A002 /* AudioRecorder.swift */; };
 		DBB051592B05E09D0008A002 /* AudioPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBB051572B05E09D0008A002 /* AudioPlayerManager.swift */; };
+		DBD9A5EA2B15129100ADB7DA /* RefreshableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD9A5E92B15129100ADB7DA /* RefreshableScrollView.swift */; };
 		DBE49AA22B0DBBA0005FBFD1 /* ShopperHome.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBE49AA12B0DBBA0005FBFD1 /* ShopperHome.swift */; };
 		DBE49AA42B0DBBA5005FBFD1 /* ShopperCart.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBE49AA32B0DBBA5005FBFD1 /* ShopperCart.swift */; };
 		DBE49AA62B0DBBB9005FBFD1 /* ShopperOrders.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBE49AA52B0DBBB9005FBFD1 /* ShopperOrders.swift */; };
@@ -167,6 +168,7 @@
 		DBB0514F2B05DADA0008A002 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		DBB051562B05E09C0008A002 /* AudioRecorder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
 		DBB051572B05E09D0008A002 /* AudioPlayerManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPlayerManager.swift; sourceTree = "<group>"; };
+		DBD9A5E92B15129100ADB7DA /* RefreshableScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefreshableScrollView.swift; sourceTree = "<group>"; };
 		DBE49AA12B0DBBA0005FBFD1 /* ShopperHome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopperHome.swift; sourceTree = "<group>"; };
 		DBE49AA32B0DBBA5005FBFD1 /* ShopperCart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopperCart.swift; sourceTree = "<group>"; };
 		DBE49AA52B0DBBB9005FBFD1 /* ShopperOrders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopperOrders.swift; sourceTree = "<group>"; };
@@ -361,6 +363,7 @@
 			isa = PBXGroup;
 			children = (
 				DBB051492B043C0D0008A002 /* prema.entitlements */,
+				DBD9A5E92B15129100ADB7DA /* RefreshableScrollView.swift */,
 				DBAEE9422B0A84FC00AF1BE2 /* Ref.swift */,
 				DB6DC97A2AC8312100F381CF /* premaApp.swift */,
 				DB0081102AF443C300C085C8 /* Info.plist */,
@@ -653,6 +656,7 @@
 				DB0081022AF42E8100C085C8 /* SplashView.swift in Sources */,
 				DB6640A42AF85A7800EEE603 /* StorageManager.swift in Sources */,
 				DBE49AA82B0DBBC7005FBFD1 /* ShopperSettings.swift in Sources */,
+				DBD9A5EA2B15129100ADB7DA /* RefreshableScrollView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -792,6 +796,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = prema/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "To take photos and videos for your profile or posts";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "To record audio for videos and voice notes";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "To pick photos and videos for your profile or posts";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -827,6 +834,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = prema/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "To take photos and videos for your profile or posts";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "To record audio for videos and voice notes";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "To pick photos and videos for your profile or posts";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

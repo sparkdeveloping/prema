@@ -81,8 +81,7 @@ struct ChatView: View {
                 MessagesView(namespace: _namespace)
                     .environmentObject(chatManager)
                     .opacity(chatManager.reply == nil ? 1:0.1)
-                    .keyboardAware()
-              
+                    .ignoresSafeArea()
 
             }
             .onTapGesture {
@@ -103,10 +102,9 @@ struct ChatView: View {
                 Spacer()
      
                 ChatInputView(inbox: chatManager.inbox)
-                    .bottomPadding(safeAreaInsets.bottom)
-                    .keyboardAware()
+                    .ignoresSafeArea()
                 }
-     
+            .ignoresSafeArea()
        
         }
         .nonVibrantSecondaryBackground(cornerRadius: 0, colorScheme: colorScheme)
@@ -136,15 +134,11 @@ struct MessagesView: View {
                 .padding(.top, safeAreaInsets.top + 50)
                 .padding(.bottom, 50)
             }
-            .scrollDismissesKeyboard(.interactively)
+            .scrollDismissesKeyboard(.immediately)
             .rotationEffect(Angle(degrees: 180))
             .background(Color.clear)
             .scrollContentBackground(.hidden)
-//            .keyboardAware()
-            .onAppear() {
-                            UITableView.appearance().backgroundColor = UIColor.green
-                            UITableViewCell.appearance().backgroundColor = UIColor.green
-                        }
+            .keyboardAware()
         }
         .background(Color.clear)
         .ignoresSafeArea()
@@ -866,7 +860,8 @@ struct ChatInputView: View {
             
       
         .horizontalPadding()
-//        .keyboardAware()
+        .bottomPadding(safeAreaInsets.bottom)
+        .keyboardAware()
         .sheet(isPresented: $viewModel.showingStickerView) {
             ChatFunCenterView()
                 .environmentObject(viewModel)
@@ -1253,9 +1248,10 @@ struct ChatTextField: View {
                         .bold()
                         .roundedFont()
                     Text("offline")
-                        .font(.subheadline)
+                        .font(.subheadline.italic())
                         .bold()
                         .roundedFont()
+                        .foregroundStyle(.secondary)
                 }
                 ProfileImageView(avatarImageURL: inbox.avatar)
                     .frame(width: 40, height: 40)

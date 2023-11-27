@@ -21,7 +21,7 @@ struct MainView: View {
     @State var appeared = false
     @State var size: CGSize = .zero
     init() {
-        // Register your custom font
+        
         UIFont.registerFontWithFilenameString("alba.ttf")
         NamespaceWrapper.shared.namespace = namespace
         if let profile = accountManager.currentProfile {
@@ -44,20 +44,30 @@ struct MainView: View {
                     .environmentObject(appearance)
                 if accountManager.currentProfile == nil {
                     AuthView()
+                        .ignoresSafeArea()
                         .environmentObject(appearance)
                 } else {
                     NavigationStack(path: $navigation.path) {
                         MainNavigationView()
+                            .toolbar(.hidden)
                             .navigationBarBackButtonHidden()
                             .ignoresSafeArea()
                             .environmentObject(appearance)
                             .navigationDestination(for: Inbox.self) { inbox in
                                 ChatView(inbox: inbox)
+                                    .toolbar(.hidden)
                             }
-                        
+                            .navigationDestination(for: String.self) { string in
+                                if string == "checkout" {
+                                    ShopperCheckoutView()
+                                        .toolbar(.hidden)
+                                }
+                            }
                     }
+                    .ignoresSafeArea()
+                    .background(
+                        Color.nonVibrantSecondary(colorScheme))
                     .overlay(alignment: .bottom) {
-                        
                             HStack {
                                 Image(navigation.showSidebar ? "Cancel":"Menu")
                                     .resizable()
@@ -114,9 +124,14 @@ struct MainView: View {
             .overlay(alignment: .leading) {
                 ZStack {
                     if navigation.path.isEmpty {
-                        Text("prema")
-                            .font(.logoFont(self.size.width / 10))
-                            .foregroundStyle(.white)
+                        VStack(alignment: .leading) {
+                            Text("prema")
+                                .font(.logoFont(self.size.width / 10))
+                                .foregroundStyle(.white)
+                            Text(appearance.currentTheme.name)
+                                .font(.caption.bold())
+                                .foregroundStyle(.white.opacity(0.6))
+                        }
                     } else {
                         Image(systemName: "xmark")
                             .font(.largeTitle.bold())
@@ -133,6 +148,13 @@ struct MainView: View {
             .offset(x: appeared ? 0:-self.size.width * 0.6, y: appeared ? 0:-self.size.width * 0.6 * 247 / 277)
             .scaleEffect(appearance.shrinkBlob || !accountManager.accounts.isEmpty ? 0.7:1, anchor: .topLeading)
             .offset(y: navigation.selectedTab == .camera ? -self.size.width * 0.6 * 247 / 277:0)
+            .onTapGesture {
+                if navigation.path.isEmpty {
+                    withAnimation(.spring()) {
+                        appearance.currentThemeIndex = appearance.currentThemeIndex == appearance.themes.count - 1 ? 0:appearance.currentThemeIndex + 1
+                    }
+                }
+            }
     }
 }
 
