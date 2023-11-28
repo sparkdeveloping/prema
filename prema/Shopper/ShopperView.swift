@@ -29,18 +29,20 @@ struct ShopperView: View {
         .tabViewStyle(.page(indexDisplayMode: .never))
         .ignoresSafeArea()
         .overlay(alignment: .bottomTrailing) {
-            Button {
-                navigation.path.append("checkout")
-            } label: {
-                Text("Checkout")
-                    .fontWeight(.bold)
-                    .roundedFont()
-                    .buttonPadding()
-                    .vibrantBackground(cornerRadius: 14, colorScheme: colorScheme)
+            if !shopper.cart.isEmpty {
+                Button {
+                    navigation.path.append("checkout")
+                } label: {
+                    Text("Checkout")
+                        .fontWeight(.bold)
+                        .roundedFont()
+                        .buttonPadding()
+                        .vibrantBackground(cornerRadius: 14, colorScheme: colorScheme)
+                }
+                .padding()
+                .bottomPadding(safeAreaInsets.bottom + 40)
+                .foregroundStyle(.primary)
             }
-            .padding()
-            .bottomPadding(safeAreaInsets.bottom + 40)
-            .foregroundStyle(.primary)
         }
     }
 }

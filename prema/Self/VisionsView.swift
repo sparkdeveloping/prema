@@ -43,10 +43,10 @@ struct VisionsView: View {
                         .bold()
                         .roundedFont()
                         .foregroundStyle(.secondary)
+                        .horizontalPadding(20)
                     Spacer()
                 }
                 .padding(.top, Double.blobHeight - safeAreaInsets.top)
-                .padding(.horizontal)
             }
         }
         .ignoresSafeArea()
@@ -104,7 +104,7 @@ struct NewVisionView: View {
                         CustomTextField(text: $name, imageName: "Badge", placeHolder: "What is the end result for this goal?")
                         Divider()
                             .padding(10)
-                        CustomTextField(text: $name, imageName: "Filter", placeHolder: "What kind of a goal is this?")
+                        CustomTextField(text: $description, imageName: "Filter", placeHolder: "What kind of a goal is this?")
                         Divider()
                             .padding(10)
                         HStack {
@@ -136,7 +136,7 @@ struct NewVisionView: View {
                
                     if !buttonEnabled {
                         Button {} label: {
-                            Text("proceed")
+                            Text("create")
                                 .font(.title3.bold())
                                 .foregroundStyle(.gray)
                                 .buttonPadding(20)
@@ -197,7 +197,8 @@ struct CustomSelectorView: View {
                     }
                 }
             }
-            .padding(10)
+            .padding()
+            .verticalPadding()
         }
         .scrollIndicators(.hidden)
     }

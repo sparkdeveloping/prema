@@ -77,7 +77,7 @@ struct DirectInbox: View {
                                     .verticalPadding(10)
                                     .horizontalPadding()
                                     .background(Color.secondary.opacity(0.1))
-                                    .clipShape(.rect(cornerRadius: 12, style: .continuous))
+                                    .clipShape(.rect(cornerRadius: 18, style: .continuous))
                                     .horizontalPadding()
                                     .contentShape(.rect)
 //                                    .matchedGeometryEffect(id: "chatProfile-\(inbox.id)", in: NamespaceWrapper.shared.namespace!)

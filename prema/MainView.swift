@@ -106,6 +106,7 @@ struct MainView: View {
             .overlay(alignment: .topLeading) {
                 blob
             }
+            .simultaneousGesture(TapGesture().onEnded { _ in hideKeyboard()})
             .onAppear {
                 self.size = size
                 appearance.size = size

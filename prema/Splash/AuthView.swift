@@ -34,7 +34,7 @@ struct AuthView: View {
                         showAuth = true
                     }
                 } label: {
-                    Text("create an account")
+                    Text("add new account")
                         .font(.title3.bold())
                         .foregroundStyle(Color.white)
                         .roundedFont()
@@ -44,21 +44,7 @@ struct AuthView: View {
                         .vibrantBackground(cornerRadius: 15, colorScheme: colorScheme)
                         .horizontalPadding(40)
                 }
-                Button {
-                    withAnimation(.spring()) {
-                        showAuth = true
-                    }
-                } label: {
-                    Text("login")
-                        .font(.title3.bold())
-                        .foregroundStyle(Color.vibrant)
-                        .roundedFont()
-                        .verticalPadding(5)
-                        .buttonPadding()
-                        .frame(maxWidth: .infinity)
-                        .nonVibrantBackground(cornerRadius: 15, colorScheme: colorScheme)
-                        .horizontalPadding(40)
-                }
+       
             }
             .bottomPadding(safeAreaInsets.bottom + 40)
             .offset(y: (appeared && !showAuth && !createProfile) ? 0:300)
@@ -278,9 +264,9 @@ struct AccountsView: View {
            
                 ZStack {
                     if media.isEmpty {
-                        Image(systemName: "plus")
-                            .font(.largeTitle)
-                            .foregroundStyle(Color.vibrant)
+                        Image("FullName")
+                            .resizable()
+                            .frame(width: 40, height: 40)
                     } else {
                         TabView {
                             ForEach(media) { item in
@@ -296,15 +282,26 @@ struct AccountsView: View {
                     }
                 }
                 .frame(width: 100, height: 100)
+                .overlay(alignment: .bottom) {
+                    Text(media.isEmpty ? "add":"change")
+                        .font(.subheadline.bold())
+                        .roundedFont()
+                        .buttonPadding(5)
+                        .vibrantBackground(cornerRadius: 12, colorScheme: colorScheme)
+                        .foregroundStyle(.white)
+                        .offset(y: 12)
+                }
+                .onTapGesture{
+                    showPicker.toggle()
+                }
                 .showMediaPicker(isPresented: $showPicker, type: .profile_avatar) { mediaa in
                     media = mediaa
                     
                 }
             
             .frame(width: 100, height: 100)
-
             .nonVibrantSecondaryBackground(cornerRadius: 40, colorScheme: colorScheme)
-
+            .verticalPadding()
             CustomTextField(text: $fullName, imageName: "FullName", placeHolder: "Full Name")
             Divider()
             CustomTextField(text: $username, imageName: "Username", placeHolder: "username")
@@ -649,13 +646,12 @@ struct ProfileImageView: View {
                         }
                     }
                     .tabViewStyle(.page(indexDisplayMode: .never))
-                    .frame(width: size.width, height: size.width)
-                    .clipShape(RoundedRectangle(cornerRadius: size.width / 3, style: .continuous))
-                    .clipped()
-                    .nonVibrantSecondaryBackground(cornerRadius: size.width / 3, colorScheme: colorScheme)
+                    
                 }
             }
-            
+            .frame(width: size.width, height: size.width)
+            .background(Color.secondary.opacity(0.1))
+            .clipShape(.rect(cornerRadius: size.width / 3, style: .continuous))
         }
     }
 }
@@ -667,5 +663,11 @@ extension Account {
             return decryptedString
         }
         return nil
+    }
+}
+
+extension View {
+    func hideKeyboard(_ force: Bool = true) {
+        UIApplication.shared.windows.forEach { $0.endEditing(force)}
     }
 }
