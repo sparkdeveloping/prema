@@ -20,8 +20,26 @@ struct Settings: Codable, Hashable {
     var allowedNotifications: [String]
 }
 
-struct ActivityStatus {
-    var status: String
+struct ActivityStatus: Codable {
+    var isOnline: [String:Bool] = [:]
+    var latest: Double = Date.now.timeIntervalSince1970
+    var typing: [String:Bool] = [:]
+    var inChat: [String:Bool] = [:]
+    
+    
+}
+
+extension [String: Any] {
+    func parseStatus() -> ActivityStatus {
+        
+        let isOnline = self["online"] as? [String:Bool] ?? [:]
+        let latest = self["latest"] as? Double ?? 0
+        let typing = self["typing"] as? [String:Bool] ?? [:]
+        let inChat = self["inChat"] as? [String:Bool] ?? [:]
+
+        return .init(isOnline: isOnline, latest: latest, typing: typing, inChat: inChat)
+        
+    }
 }
 
 struct Profile: Identifiable, Codable, Hashable {
@@ -42,17 +60,20 @@ struct Profile: Identifiable, Codable, Hashable {
     var avatarImageURL: String? = nil
     var type: ProfileType = .none
     var privacy: Privacy = .public
-    var settings: Settings = Self.defaultSettings
+    var settings: Settings? = defaultSettings
     var visions: [Vision] = []
+    var status: ActivityStatus? = nil
     
     static var defaultSettings = Settings(allowedNotifications: ["general" ,"direct"])
+    
+    
 }
 
-extension ActivityStatus {
-    var dictionary: [String: Any] {
-        return ["status": self.status]
-    }
-}
+//extension ActivityStatus {
+//    var dictionary: [String: Any] {
+//        return ["status": self.status]
+//    }
+//}
 
 extension Settings {
     var dictionary: [String: Any] {
@@ -67,13 +88,13 @@ extension [String: Any] {
     }
 }
 
-extension [String: Any] {
-    func parseActivity(_ id: String? = nil) -> ActivityStatus {
-        let status = self["status"] as? String ?? "offline"
-        
-        return .init(status: status)
-    }
-}
+//extension [String: Any] {
+//    func parseActivity(_ id: String? = nil) -> ActivityStatus {
+//        let status = self["status"] as? String ?? "offline"
+//        
+//        return .init(status: status)
+//    }
+//}
 
 extension [String: Any] {
     func parseProfile(_ id: String? = nil) -> Profile {
@@ -128,8 +149,9 @@ extension Profile {
         if !self.avatars.isEmpty {
             dict["avatarImageURL"] =  self.avatars[0].imageURLString
         }
-        dict["settings"] =  self.settings.dictionary
-
+        if let settings {
+            dict["settings"] = settings.dictionary
+        }
         dict["type"] = self.type.rawValue
         dict["privacy"] = self.privacy.rawValue
         

@@ -5,6 +5,8 @@
 //  Created by Denzel Nyatsanza on 11/7/23.
 //
 
+import Combine
+import MapItemPicker
 import FirebaseDatabase
 import Firebase
 import Foundation
@@ -67,17 +69,17 @@ class ChatManager: ObservableObject {
             print("this is called: deinit")
         }
     
-    func getActivityStatus() {
-//        for (index, profile) in inbox.members.enumerated() {
-//            let ref = Database.database().reference().child("profiles").child(profile.id).child("status")
-//                
-//            ref.observe(.value) { snapshot in
-//                if let data = snapshot.value as? [String: Any] {
-//                    profile.status = data.parseActivity
-//                }
-//            }
-//
-//        }
+    func getActivityStatus(inbox: Inbox) {
+        for (index, profile) in inbox.members.enumerated() {
+            let ref = Database.database().reference().child("profiles").child(profile.id).child("status")
+                
+            ref.observe(.value) { snapshot in
+                if let data = snapshot.value as? [String: Any] {
+//                    profile.status = data.parseStatus()
+                }
+            }
+
+        }
 
     }
     
@@ -93,6 +95,10 @@ class ChatManager: ObservableObject {
             print("\n\n\n sending 3 \n\n\n\n")
             
             var type: MessageType = .text
+            
+            if !media.isEmpty {
+                type = media.contains(where: {$0.type == .audio }) ? .audio:media.contains(where: {$0.type == .audio }) ? .video:.image
+            }
             
             let message = Message(id: id, inboxID: inbox.id, type: type, media: nil, sticker: sticker, text: text.isEmpty ? nil:text, timestamp: timestamp, opened: [])
             
@@ -116,6 +122,9 @@ class ChatManager: ObservableObject {
                 }
 
             }
+            
+            self.text = ""
+            self.media.removeAll()
             
         }
     }
@@ -188,7 +197,7 @@ class ChatManager: ObservableObject {
     }
     
 }
-/*
+
 class TypingObserver: ObservableObject {
     @Published var isTyping = false
     private var typingCancellable: AnyCancellable?
@@ -247,4 +256,4 @@ class TypingObserver: ObservableObject {
         }
     }
 }
-*/
+

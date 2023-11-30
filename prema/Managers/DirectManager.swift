@@ -7,6 +7,7 @@
 
 import AlgoliaSearchClient
 import FirebaseFirestore
+import FirebaseDatabase
 import Foundation
 import SwiftUI
 
@@ -169,4 +170,125 @@ class DirectManager: ObservableObject {
         
        
     }
+}
+
+class ActivityStatusViewModel: ObservableObject {
+    @Published var status: ActivityStatus = .init()
+    
+    var inbox: Inbox!
+    var statusHandle: DatabaseHandle!
+
+    var online: [Profile] {
+        var onl: [Profile] = []
+        self.status.isOnline.forEach({ (key, value) in
+            print("the online: \(key) - \(value)")
+            if let profile = self.inbox.members.first(where: { $0.id == key }) {
+                if value == true {
+                    onl.append(profile)
+                }
+            }
+        })
+        return onl.filter({$0.id != AccountManager.shared.currentProfile?.id})
+    }
+    
+    var inChat: [Profile] {
+        var onl: [Profile] = []
+        self.status.inChat.forEach({ (key, value) in
+            print("the online: \(key) - \(value)")
+            if let profile = self.inbox.members.first(where: { $0.id == key }) {
+                if value == true {
+                    onl.append(profile)
+                }
+            }
+        })
+        return onl.filter({$0.id != AccountManager.shared.currentProfile?.id})
+    }
+    
+    var typing: [Profile] {
+        var onl: [Profile] = []
+        self.status.typing.forEach({ (key, value) in
+            print("the online: \(key) - \(value)")
+            if let profile = self.inbox.members.first(where: { $0.id == key }) {
+                if value == true {
+                    onl.append(profile)
+                }
+            }
+        })
+        return onl.filter({$0.id != AccountManager.shared.currentProfile?.id})
+    }
+    
+    var onlineCount: Int {
+        return online.count
+    }
+    var inChatCount: Int {
+        return inChat.count
+    }
+    var typingCount: Int {
+        return typing.count
+    }
+    
+    var statusText: String {
+        if typingCount > 2 {
+            return "\(typingCount) typing..."
+        } else if typingCount == 2 {
+            return typing[0].fullName + " & " +  typing[1].fullName + " typing..."
+        } else if typingCount == 1 {
+            return "typing..."
+        }
+        if inChatCount > 2 {
+            return "\(inChatCount) active."
+        } else if inChatCount == 2 {
+            return inChat[0].fullName + " & " +  inChat[1].fullName + " active."
+        } else if inChatCount == 1 {
+            return "active"
+        }
+        if onlineCount > 2 {
+            return "\(onlineCount) online."
+        } else if onlineCount == 2 {
+            return online[0].fullName + " & " +  online[1].fullName + " online."
+        } else if onlineCount == 1 {
+            return "online"
+        }
+        return "offline"
+    }
+    
+    
+    var statusColor: LinearGradient {
+       
+        if !inChat.isEmpty {
+            return .linearGradient(colors: [.blue, .teal], startPoint: .topLeading, endPoint: .bottomTrailing)
+        }
+        if !online.isEmpty {
+            return .linearGradient(colors: [.green, .green], startPoint: .topLeading, endPoint: .bottomTrailing)
+        }
+
+        return .linearGradient(colors: [.gray], startPoint: .topLeading, endPoint: .bottomTrailing)
+
+    }
+    
+    func getStatus(inbox: Inbox) {
+        self.inbox = inbox
+        
+        let ref = Database.database().reference().child("direct").child("inbox").child(inbox.id).child("status")
+            
+        print("the online: 1: \(inbox.id)")
+        statusHandle = ref.observe(.value) { snapshot in
+            print("the online: 2: \(snapshot)")
+            if let data = snapshot.value as? [String: Any] {
+                print("the online: 3: \(data)")
+                let status = data.parseStatus()
+                print("the online 4.5: \(status)")
+
+                self.status = status
+//                        self.accepts.remove(at: index)
+//                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//                            self.accepts.insert(inbox, at: 0)
+//                        }
+//                    self.accepts[index].unread = inbox.unread
+                }
+            
+        }
+
+    }
+    
 }

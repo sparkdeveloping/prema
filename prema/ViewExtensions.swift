@@ -16,10 +16,10 @@ extension View {
         shadow(color: .shadoww, radius: 10)
     }
 
-    func haptic(toggle: Bool, style: UIImpactFeedbackGenerator.FeedbackStyle = .medium) -> some View {
+    func haptic(style: UIImpactFeedbackGenerator.FeedbackStyle = .medium) {
         let generator = UIImpactFeedbackGenerator(style: style)
         generator.impactOccurred()
-        return self
+        
     }
     func showMediaPicker(isPresented: Binding<Bool>, type: MediaConfigType, max: Int = 7, media: @escaping ([Media]) -> ()) -> some View {
         modifier(MediaPickerModifier(isPresented: isPresented, type: type, max: max, media: { mediaa in

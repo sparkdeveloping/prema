@@ -342,12 +342,23 @@ extension Message {
         if let text = self.text {
             dict["text"] = text
         }
+        dict["type"] = self.type.rawValue
         if let media = self.media {
             dict["media"] = media.map { $0.dictionary }
         }
         dict["inboxID"] = self.inboxID
 //        dict["timestamp"] = self.timestamp.dictionary
         dict["timestamp"] = timestamp.dictionary
+        if let destruction {
+            dict["destruction"] = self.destruction
+        }
+        if let expiry {
+            dict["expiry"] = self.expiry
+        }
+        dict["timestamp"] = timestamp.dictionary
+        if let sticker {
+            dict["sticker"] = sticker.dictionary
+        }
         dict["isDeleted"] = false
 
         return dict

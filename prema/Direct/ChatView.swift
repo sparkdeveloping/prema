@@ -28,9 +28,12 @@ struct ChatView: View {
     @StateObject var chatManager = ChatManager()
     @Namespace var namespace
     @ObservedObject var inbox: Inbox
-  
+    @StateObject var statusViewModel = ActivityStatusViewModel()
+
     var GodIsGood = true
     @State var headerFrame: CGRect = .zero
+    @State var reply: Message?
+    
     var chatContextMenuAndHeader: some View {
         
         let message = chatManager.selectedMessage
@@ -51,12 +54,13 @@ struct ChatView: View {
             let finalY = message == nil ? (safeAreaInsets.top):y
             let finalX = message == nil ? (appearance.size.width / 2):right ? rX:lX
             
-            ChatTopView() { frame in
+            ChatTopView(reply: $reply) { frame in
                 headerFrame = frame
             }
             //        .matchedGeometryEffect(id: "chatProfile-\(chatManager.inbox.id)", in: NamespaceWrapper.shared.namespace!)
             .environmentObject(inbox)
             .environmentObject(chatManager)
+            .environmentObject(statusViewModel)
             .scaleEffect(message == nil ? 0.4:1)
             .position(x: finalX, y:  finalY)
             .animation(.spring(), value: message)
@@ -103,6 +107,8 @@ struct ChatView: View {
                     ChatTextField(inbox: inbox)
                         .environmentObject(chatManager)
                         .environmentObject(appearance)
+                        .environmentObject(statusViewModel)
+
 //                        .matchedGeometryEffect(id: "chatProfile-\(chatManager.inbox.id)", in: NamespaceWrapper.shared.namespace!)
                 }
                 
@@ -300,6 +306,7 @@ struct ChatBubble: View {
                     )
                     .simultaneousGesture(LongPressGesture().onEnded({ _ in
                         self.isLongPressing.toggle()
+                        haptic()
                     }))
                     .opacity(viewModel.selectedMessage == nil ? 1:viewModel.selectedMessage != message ? 0.1:1)
            
@@ -377,22 +384,22 @@ struct ChatBubble: View {
                                         viewModel: AudioPlayeViewModel(url: audioURL),
                                         durationObserver: PlayerDurationObserver(player: player),
                                         itemObserver: PlayerItemObserver(player: player), audioURL: audioURL)
-//                .onAppear {
-//                    print("yeet audio appeared: \(audioURL)")
-//                    let playerItem = AVPlayerItem(url: audioURL)
-//                    player.replaceCurrentItem(with: playerItem)
-//                    player.play()
-//                }
-//                .simultaneousGesture(TapGesture().onEnded  {
-//                    print("yeet audio clicked: \(audioURL)")
-//                    let playerItem = AVPlayerItem(url: audioURL)
-//                    player.replaceCurrentItem(with: playerItem)
-//                    player.play()
-//                })
+                .onAppear {
+                    print("yeet audio appeared: \(audioURL)")
+                    let playerItem = AVPlayerItem(url: audioURL)
+                    player.replaceCurrentItem(with: playerItem)
+                    player.play()
+                }
+                .simultaneousGesture(TapGesture().onEnded  {
+                    print("yeet audio clicked: \(audioURL)")
+                    let playerItem = AVPlayerItem(url: audioURL)
+                    player.replaceCurrentItem(with: playerItem)
+                    player.play()
+                })
+                .onTapGesture(coordinateSpace: .global) { location in
+                    audioPlayerManager.seek(to: location.x)
+                }
             }
-            //                                        .onTapGesture { location in
-            //                                            audioPlayerManager.seek(to: location)
-            //                                            }
         }
         .frame(height: 40)
     }
@@ -492,7 +499,7 @@ struct ChatTopView: View {
     @Environment (\.dismiss) var dismiss
     @Environment (\.safeAreaInsets) var safeAreaInsets
     @Namespace var namespace
-    
+    @Binding var reply: Message?
     var frame: (CGRect) -> ()
     
     enum ChatTopViewMode {
@@ -503,8 +510,8 @@ struct ChatTopView: View {
     var mode: ChatTopViewMode {
         return viewModel.selectedMessage == nil ? .header:.context
     }
-//    @StateObject var statusViewModel = ActivityStatusViewModel()
-    
+    @EnvironmentObject var statusViewModel: ActivityStatusViewModel
+
     var emojis: [String] {
         var array: [String] = []
         for i in 0x1F601...0x1F64F {
@@ -602,7 +609,7 @@ struct ChatTopView: View {
                                 .onTapGesture {
                                     withAnimation(.spring()) {
                                         
-                                        self.viewModel.reply = self.viewModel.selectedMessage
+                                        reply = self.viewModel.selectedMessage
                                         viewModel.selectedMessage = nil
                                     }
                                 }
@@ -647,7 +654,7 @@ struct ChatTopView: View {
         .padding(.horizontal)
         .padding(.top, safeAreaInsets.top)
         .onAppear {
-//            self.statusViewModel.getStatus(inbox: viewModel.inbox)
+            self.statusViewModel.getStatus(inbox: inbox)
         }
     }
     
@@ -661,7 +668,7 @@ struct ChatInputView: View {
 
     @StateObject private var audioRecorder: AudioRecorder = AudioRecorder()
     @StateObject private var audioPlayerManager: AudioPlayerManager = AudioPlayerManager()
-//    @StateObject private var statusObserver = TypingObserver()
+    @StateObject private var statusObserver = TypingObserver()
 
     @State var liveConfiguration: Waveform.Configuration = Waveform.Configuration(
         style: .striped(.init(color: .systemBlue, width: 3, spacing: 3)))
@@ -715,16 +722,19 @@ struct ChatInputView: View {
                                             Color.clear
                                                 .contentShape(Rectangle())
                                                 .onAppear {
-                                                    let waveformImageDrawer = WaveformImageDrawer()
-                                                    waveformImageDrawer.waveformImage(fromAudioAt: audioURL, with: liveConfigurationPlayback) { image in
-                                                        // need to jump back to main queue
+//                                                    SwiftUI.Task {
+//                                                        let waveformImageDrawer = WaveformImageDrawer()
+////                                                        
+//                                                        let image = try await waveformImageDrawer.waveformImage(fromAudioAt: audioURL, with: liveConfigurationPlayback)
+////                                                        // need to jump back to main queue
                                                         DispatchQueue.main.async {
                                                             audioPlayerManager.initializePlayer(audioURL)
-//                                                            let media = prema.Media(id: "audio-note", audioURLString: audioURL.absoluteString, uiImage: image)
-//                                                            viewModel.media = [media]
+                                                            let media = prema.Media(id: "audio-note", audioURLString: audioURL.absoluteString)
+                                                            viewModel.media = [media]
                                                         }
-                                                    }
+//                                                    }
                                                 }
+                                                    
                                         }
                                     }
                                 WaveformView(audioURL: audioURL, configuration: liveConfigurationPlayback, priority: .high)
@@ -846,7 +856,7 @@ struct ChatInputView: View {
 //                    .blur(radius: 3, opaque: false)
 //                    .padding([.horizontal, .top], -6)
 //            }
-            .onChange(of: audioRecorder.isRecording) { newValue in
+            .onChange(of: audioRecorder.isRecording) { _,newValue in
                 if newValue {
                     liveConfiguration = Waveform.Configuration(
                         style: .striped(.init(color: .systemRed, width: 3, spacing: 3)))
@@ -855,15 +865,15 @@ struct ChatInputView: View {
                         style: .striped(.init(color: .systemBlue, width: 3, spacing: 3)))
                 }
             }
-//            .onChange(of: viewModel.text) { statusObserver.handleTyping($0, inbox: viewModel.inbox)
-//            }
-//            .onAppear {
-//                statusObserver.handleInChat(bool: true, inbox: viewModel.inbox)
-//            }
-//            .onDisappear {
-//                statusObserver.handleInChat(bool: false, inbox: viewModel.inbox)
-//            }
-            .onChange(of: viewModel.reply) { newValue in
+            .onChange(of: viewModel.text) { statusObserver.handleTyping($0, inbox: inbox)
+            }
+            .onAppear {
+                statusObserver.handleInChat(bool: true, inbox: inbox)
+            }
+            .onDisappear {
+                statusObserver.handleInChat(bool: false, inbox: inbox)
+            }
+            .onChange(of: viewModel.reply) { _,newValue in
                 
                     self.isFocused = newValue != nil
                 
@@ -1235,6 +1245,9 @@ struct ChatTextField: View {
     @Environment (\.safeAreaInsets) var safeAreaInsets
     @EnvironmentObject var viewModel: ChatManager
     @EnvironmentObject var appearance: AppearanceManager
+    
+    @EnvironmentObject var statusViewModel: ActivityStatusViewModel
+    
     @State var expand = false
     var body: some View {
         HStack {
@@ -1258,7 +1271,7 @@ struct ChatTextField: View {
                     Text(inbox.name)
                         .bold()
                         .roundedFont()
-                    Text("offline")
+                    Text("\(statusViewModel.statusText)")
                         .font(.subheadline.italic())
                         .bold()
                         .roundedFont()
