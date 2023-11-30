@@ -155,14 +155,24 @@ struct ProfileSearchView: View {
     @Environment (\.colorScheme) var colorScheme
     @Environment (\.dismiss) var dismiss
     @EnvironmentObject var appearance: AppearanceManager
-
-    var action: ([Profile]) -> ()
+    var preloadTitle: String?
+    var preload: [Profile]?
+    
+ 
+    
     @State var profiles: [Profile] = []
     @State var selectedProfiles: [Profile] = []
 
     @StateObject var directManager = DirectManager.shared
 
     @State var text = ""
+    var action: ([Profile]) -> ()
+    
+    init(preloadTitle: String? = nil, preload: [Profile]? = nil, action: @escaping ([Profile]) -> ()) {
+        self.preloadTitle = preloadTitle
+        self.preload = preload
+        self.action = action
+    }
     
     var body: some View {
         ScrollView {
@@ -176,10 +186,54 @@ struct ProfileSearchView: View {
                                 }
                             }
                         }
-                        .buttonPadding()
-                        .nonVibrantBackground(cornerRadius: 14, colorScheme: colorScheme)
+                        .buttonPadding(15)
+                        .nonVibrantBackground(cornerRadius: 17, colorScheme: colorScheme)
                     DismissButton() {
                         NavigationManager.shared.showNewInbox = false
+                    }
+                }
+                VStack(alignment: .leading) {
+                    if let preloadTitle {
+                        Text(preloadTitle)
+                            .font(.subheadline.bold())
+                            .foregroundStyle(.secondary)
+                    }
+                    if let preload {
+                        ForEach(preload) { profile in
+                            VStack {
+                                HStack {
+                                    ProfileImageView(avatars: profile.avatars)
+                                        .frame(width: 40, height: 40)
+                                    VStack(alignment: .leading) {
+                                        Text(profile.fullName)
+                                            .bold()
+                                            .roundedFont()
+                                        Text("@" + profile.username)
+                                            .font(.subheadline)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Spacer()
+                                    if selectedProfiles.contains(profile) {
+                                        Text(selectedProfiles.contains(profile) ? "deselect":"select")
+                                            .font(.subheadline.bold())
+                                            .foregroundStyle(selectedProfiles.contains(profile) ? .secondary:appearance.currentTheme.vibrantColors[0])
+                                    }
+                                  
+                                }
+                                Divider()
+                            }
+                            .buttonPadding()
+                            .contentShape(.rect)
+                            .onTapGesture {
+                                withAnimation(.spring()) {
+                                    if let index = self.selectedProfiles.firstIndex(of: profile) {
+                                        self.selectedProfiles.remove(at: index)
+                                    } else {
+                                        self.selectedProfiles.insert(profile, at: 0)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 ForEach(profiles) { profile in
@@ -196,9 +250,12 @@ struct ProfileSearchView: View {
                                     .foregroundStyle(.secondary)
                             }
                             Spacer()
-                            Circle()
-                                .fill(selectedProfiles.contains(profile) ? appearance.currentTheme.vibrantColors[0]:.secondary)
-                                .frame(width: 12, height: 12)
+                            if selectedProfiles.contains(profile) {
+                                Text(selectedProfiles.contains(profile) ? "deselect":"select")
+                                    .font(.subheadline.bold())
+                                    .foregroundStyle(selectedProfiles.contains(profile) ? .secondary:appearance.currentTheme.vibrantColors[0])
+                            }
+                          
                         }
                         Divider()
                     }

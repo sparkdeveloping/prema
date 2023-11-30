@@ -32,51 +32,103 @@ struct premaApp: App {
     }
 }
 
-
-class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate, UNUserNotificationCenterDelegate {
-    var window: UIWindow?
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Configure Firebase
+        
         FirebaseApp.configure()
-
-        // Set FCM delegate
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            print("Notification permissions granted: \(granted)")
+        }
+        center.requestAuthorization(options:[.badge, .alert, .sound]){ (granted, error) in }
+        
+        center.delegate = self
+                
         Messaging.messaging().delegate = self
-
-        // Register for remote notifications
-        UNUserNotificationCenter.current().delegate = self
-        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-        UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { _, _ in }
+        FirebaseConfiguration.shared.setLoggerLevel(.min)
+        
+        let openAction = UNNotificationAction(identifier: "OpenNotification", title: NSLocalizedString("Abrir", comment: ""), options: UNNotificationActionOptions.foreground)
+        let deafultCategory = UNNotificationCategory(identifier: "CustomSamplePush", actions: [openAction], intentIdentifiers: [], options: [])
+        center.setNotificationCategories(Set([deafultCategory]))
+        
         application.registerForRemoteNotifications()
+        
+        let voipRegistry = PKPushRegistry(queue: DispatchQueue.main)
+            voipRegistry.delegate = self
+        voipRegistry.desiredPushTypes = [PKPushType.voIP]
 
+        
         return true
     }
 
-    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        // Send device token to Firebase
-        Messaging.messaging().apnsToken = deviceToken
+    func applicationWillResignActive(_ application: UIApplication) {
     }
 
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
-        // Process received notification
-        let apsData = userInfo["aps"] as! [String: Any]
-        let alertData = apsData["alert"] as! [String: Any]
-        let title = alertData["title"] as! String
-        let body = alertData["body"] as! String
+    func applicationDidEnterBackground(_ application: UIApplication) {
+    }
 
-        let content = UNMutableNotificationContent()
-        content.title = title
-        content.body = body
-        content.sound = .default
+    func applicationWillEnterForeground(_ application: UIApplication) {
+    }
 
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(request) { error in
-           
-            if let error = error {
-                print("Error adding notification: \(error)")
-            }
+    func applicationDidBecomeActive(_ application: UIApplication) {
+    }
+
+    func applicationWillTerminate(_ application: UIApplication) {
+    }
+
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
+        print("here is your token: \(deviceToken)")
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("Failed to register for remote notifications: \(error.localizedDescription)")
+    }
+    
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        print("Received FCM token: \(fcmToken ?? "")")
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        process(notification)
+        completionHandler([.banner, .sound])
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        
+        process(response.notification)
+
+        completionHandler()
+    }
+    
+    private func process(_ notification: UNNotification) {
+        // 1
+        if let id = notification.request.content.userInfo["inboxID"] as? String {
+         
+            NavigationManager.shared.notificationInboxID = id
+            
+            UIApplication.shared.applicationIconBadgeNumber = 0
+            //        if let inbox = userInfo["inbox"] as? [String: Any] {
+            //          NavigationManager.shared.selectedTab = .direct
+            //          NavigationManager.shared.showSidebar = false
+            //            NavigationManager.shared.path.append(inbox.parseInbox())
+            //      }
         }
     }
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+
+
+        if let menu = userInfo["inboxID"] as? String {
+            print("\n\n\n THIS IS GETTING CALLED: " + menu)
+        }
+
+        Messaging.messaging().appDidReceiveMessage(userInfo)
+
+        completionHandler(UIBackgroundFetchResult.newData)
+    }
+
 }
 
 
@@ -85,6 +137,7 @@ extension AppDelegate: PKPushRegistryDelegate {
     func pushRegistry(_ registry: PKPushRegistry, didUpdate pushCredentials: PKPushCredentials, for type: PKPushType) {
         let deviceToken = pushCredentials.token.map { String(format: "%02x", $0) }.joined()
         print("VoIP device token: \(deviceToken)")
+
         // You can send the device token to your server here
     }
 
@@ -95,4 +148,5 @@ extension AppDelegate: PKPushRegistryDelegate {
         // Handle the VoIP notification payload
     }
 
+    
 }

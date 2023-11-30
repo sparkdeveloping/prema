@@ -16,41 +16,166 @@ enum MessageType: String, Codable {
 }
 
 
-struct Vision: Identifiable, Equatable, Codable {
+class Vision: Identifiable, Equatable, Codable, Hashable, ObservableObject {
     static func == (lhs: Vision, rhs: Vision) -> Bool {
         lhs.id == rhs.id
     }
-    
-    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
     var id: String
-    var name: String
-    var description: String
-    var comments: [Comment]
+    var title: String
+    var category: String
+    var privacy: Privacy
+    var comments: [Message]
     var deadline: Double
     var visionaries: [Profile]
+    var accepts: [String]
     var timestamps: [Timestamp]
     var completionTimestamp: Timestamp?
-    var tasks: [Task]
+    @Published var tasks: [Task]
+    
+    init(id: String, title: String, category: String, privacy: Privacy, comments: [Message], deadline: Double, visionaries: [Profile], accepts: [String], timestamps: [Timestamp], completionTimestamp: Timestamp? = nil, tasks: [Task]) {
+        self.id = id
+        self.title = title
+        self.category = category
+        self.privacy = privacy
+        self.comments = comments
+        self.deadline = deadline
+        self.visionaries = visionaries
+        self.accepts = accepts
+        self.timestamps = timestamps
+        self.completionTimestamp = completionTimestamp
+        self.tasks = tasks
+    }
+    
+    enum CodingKeys: String, CodingKey {
+            case id
+            case title
+            case category
+            case privacy
+            case comments
+            case deadline
+            case visionaries
+            case accepts
+            case timestamps
+            case completionTimestamp
+            case tasks
+        }
+    
+    required init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            id = try container.decode(String.self, forKey: .id)
+            title = try container.decode(String.self, forKey: .title)
+            category = try container.decode(String.self, forKey: .category)
+            privacy = try container.decode(Privacy.self, forKey: .privacy)
+            comments = try container.decode([Message].self, forKey: .comments)
+            deadline = try container.decode(Double.self, forKey: .deadline)
+            visionaries = try container.decode([Profile].self, forKey: .visionaries)
+            accepts = try container.decode([String].self, forKey: .accepts)
+            timestamps = try container.decode([Timestamp].self, forKey: .timestamps)
+            completionTimestamp = try container.decodeIfPresent(Timestamp.self, forKey: .completionTimestamp)
+            tasks = try container.decode([Task].self, forKey: .tasks)
+        }
+        
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(id, forKey: .id)
+            try container.encode(title, forKey: .title)
+            try container.encode(category, forKey: .category)
+            try container.encode(privacy, forKey: .privacy)
+            try container.encode(comments, forKey: .comments)
+            try container.encode(deadline, forKey: .deadline)
+            try container.encode(visionaries, forKey: .visionaries)
+            try container.encode(accepts, forKey: .accepts)
+            try container.encode(timestamps, forKey: .timestamps)
+            try container.encode(completionTimestamp, forKey: .completionTimestamp)
+            try container.encode(tasks, forKey: .tasks)
+        }
+    
 }
 
-struct Task: Identifiable, Codable {
+extension [String: Any] {
+    func parseVision(_ id: String? = nil) -> Vision {
+        var _id = self["id"] as? String ?? UUID().uuidString
+        
+        if let id {
+            _id = id
+        }
+        
+        let title = self["title"] as? String ?? ""
+        let category = self["category"] as? String ?? "other"
+        let privacy = Privacy(rawValue: (self["privacy"] as? String ?? "private")) ?? .private
+        let comments = (self["comments"] as? [[String: Any]] ?? []).map { $0.parseMessage() }
+        let deadline = self["deadline"] as? Double ?? Date.now.timeIntervalSince1970
+        let visionaries = (self["visionaries"] as? [[String: Any]] ?? []).map { $0.parseProfile() }
+        let accepts = self["accepts"] as? [String] ?? []
+        let timestamps = (self["timestamps"] as? [[String: Any]] ?? []).map { $0.parseTimestamp() }
+        let completionTimestamp = (self["completionTimestamp"] as? [String: Any])?.parseTimestamp()
+        let tasks = (self["tasks"] as? [[String: Any]] ?? []).map { $0.parseTask() }
+        
+        return .init(id: _id, title: title, category: category, privacy: privacy, comments: comments, deadline: deadline, visionaries: visionaries, accepts: accepts, timestamps: timestamps, completionTimestamp: completionTimestamp, tasks: tasks)
+    }
+}
+
+class Task: Identifiable, Codable {
     var id: String
-    var name: String
-    var description: String
-    var comments: [Comment]
-    var startDate: Double
-    var endDate: Double
+    var title: String
+    var start: Double
+    var end: Double
     var responsibles: [Profile]
     var timestamps: [Timestamp]
     var completionTimestamp: Timestamp?
     var recursion: Recursion
+    
+    var dictionary: [String: Any] {
+        var dict: [String: Any] = [:]
+        
+        dict["id"] = self.id
+        dict["title"] = self.title
+        dict["start"] = self.start
+        dict["end"] = self.end
+        dict["responsibles"] = self.responsibles.map { $0.dictionary }
+        dict["timestamps"] = self.timestamps.map { $0.dictionary }
+        dict["completionTimestamp"] = self.completionTimestamp?.dictionary
+        dict["recursion"] = self.recursion.rawValue
+
+        return dict
+        
+    }
+    
+    init(id: String, title: String, start: Double, end: Double, responsibles: [Profile], timestamps: [Timestamp], completionTimestamp: Timestamp? = nil, recursion: Recursion) {
+        self.id = id
+        self.title = title
+        self.start = start
+        self.end = end
+        self.responsibles = responsibles
+        self.timestamps = timestamps
+        self.completionTimestamp = completionTimestamp
+        self.recursion = recursion
+    }
 }
 
-struct Comment: Identifiable, Codable {
-    var id: String
-    var profile: [Profile]
-    var message: [Message]
-    var timestamp: Double
+extension [String: Any] {
+    
+    func parseTask(_ id: String? = nil) -> Task {
+        var _id = self["id"] as? String ?? UUID().uuidString
+        
+        if let id {
+            _id = id
+        }
+        
+        let title = self["title"] as? String ?? ""
+        let recursion = Recursion(rawValue: (self["recursion"] as? String ?? "never")) ?? .never
+        let start = self["start"] as? Double ?? Date.now.timeIntervalSince1970
+        let end = self["end"] as? Double ?? Date.now.timeIntervalSince1970
+        let responsibles = (self["visionaries"] as? [[String: Any]] ?? []).map { $0.parseProfile() }
+        let accepts = self["accepts"] as? [String] ?? []
+        let timestamps = (self["timestamps"] as? [[String: Any]] ?? []).map { $0.parseTimestamp() }
+        let completionTimestamp = (self["completionTimestamp"] as? [String: Any])?.parseTimestamp()
+        
+        return .init(id: _id, title: title, start: start, end: end, responsibles: responsibles, timestamps: timestamps, completionTimestamp: completionTimestamp, recursion: recursion)
+    }
 }
 
 class Message: ObservableObject, Identifiable, Equatable, Codable {

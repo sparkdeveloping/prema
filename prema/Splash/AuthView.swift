@@ -481,7 +481,6 @@ struct CustomTextField: View {
                 .resizable()
                 .frame(width: 20, height: 20)
                 .padding(8)
-                .foregroundStyle(.secondary)
                 .nonVibrantSecondaryBackground(cornerRadius: 10, colorScheme: colorScheme)
             if !showPassword {
                 TextField(placeHolder, text: $text)
@@ -489,6 +488,7 @@ struct CustomTextField: View {
                 SecureField(placeHolder, text: $text)
             }
         }
+        .foregroundStyle(.primary)
         .overlay(alignment: .trailing) {
             if placeHolder == "Password" {
                 Image(systemName: showPassword ? "eye.slash.fill":"eye.fill")
@@ -502,6 +502,38 @@ struct CustomTextField: View {
                     .padding(.horizontal)
             }
         }
+    }
+}
+
+struct CustomPickerView: View {
+    @Binding var selection: String?
+    var imageName = "Filter"
+    var selectTitle = "Select Category"
+    @Environment(\.colorScheme) var colorScheme
+    @StateObject var appearance = AppearanceManager.shared
+    var categories: [String]
+    
+    var body: some View {
+        Menu {
+            ForEach(categories) { category in
+                Button(category.capitalized) {
+                    selection = category
+                }
+            }
+        } label: {
+            HStack {
+                Image(imageName)
+                    .resizable()
+                    .frame(width: 20, height: 20)
+                    .padding(8)
+                    .nonVibrantSecondaryBackground(cornerRadius: 10, colorScheme: colorScheme)
+                Text(selection == nil ? selectTitle:selection!.capitalized)
+                Spacer()
+            }
+            .contentShape(.rect)
+        }
+        .foregroundStyle(.primary)
+
     }
 }
 

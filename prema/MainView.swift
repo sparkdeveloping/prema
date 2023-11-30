@@ -11,6 +11,7 @@ import SwiftUI
 struct MainView: View {
     @EnvironmentObject var appearance: AppearanceManager
     @EnvironmentObject var navigation: NavigationManager
+    @StateObject var selfManager = SelfManager.shared
 
     @StateObject var accountManager = AccountManager.shared
     @Environment(\.safeAreaInsets) var safeAreaInsets
@@ -63,8 +64,23 @@ struct MainView: View {
                                         .toolbar(.hidden)
                                 }
                             }
+                            .navigationDestination(for: Vision.self) { vision in
+                                VisionDetailView(vision: vision)
+                                    .toolbar(.hidden)
+                            }
+                            .onReceive(navigation.$notificationInboxID) {
+                                if let id = $0 {
+                                    DirectManager.shared.fetchInbox(id) { inbox in
+                                        navigation.selectedTab = .direct
+                                        navigation.showSidebar = false
+                                        navigation.path.append(inbox)
+                                    }
+                                }
+                              
+                            }
                     }
                     .ignoresSafeArea()
+                  
                     .background(
                         Color.nonVibrantSecondary(colorScheme))
                     .overlay(alignment: .bottom) {
@@ -97,6 +113,19 @@ struct MainView: View {
                             .offset(y: navigation.path.isEmpty ? 0: 100)
                             .bottomPadding(safeAreaInsets.bottom)
                             .horizontalPadding()
+                    }
+                    .overlay {
+                        Color.clear.nonVibrantBackground(cornerRadius: 0, colorScheme: colorScheme)
+                            .opacity((navigation.showNewVision || navigation.showNewTaskVision != nil) ? 0.9:0)
+                            .ignoresSafeArea()
+                        NewVisionView()
+                            .offset(y: navigation.showNewVision  ? 0:appearance.size.height)
+                            .environmentObject(selfManager)
+                        if let vision = navigation.showNewTaskVision {
+                            NewTaskView(vision: vision)
+                                .offset(y: navigation.showNewTaskVision != nil ? 0:appearance.size.height)
+                                .environmentObject(selfManager)
+                        }
                     }
                 }
                 

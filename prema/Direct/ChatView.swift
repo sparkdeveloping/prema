@@ -25,11 +25,10 @@ struct ChatView: View {
     @Environment (\.colorScheme) var colorScheme
     @EnvironmentObject var appearance: AppearanceManager
     @EnvironmentObject var navigation: NavigationManager
-    @StateObject var chatManager: ChatManager
+    @StateObject var chatManager = ChatManager()
     @Namespace var namespace
-    init(inbox: Inbox) {
-        self._chatManager = StateObject(wrappedValue: ChatManager(inbox))
-    }
+    @ObservedObject var inbox: Inbox
+  
     var GodIsGood = true
     @State var headerFrame: CGRect = .zero
     var chatContextMenuAndHeader: some View {
@@ -56,10 +55,13 @@ struct ChatView: View {
                 headerFrame = frame
             }
             //        .matchedGeometryEffect(id: "chatProfile-\(chatManager.inbox.id)", in: NamespaceWrapper.shared.namespace!)
+            .environmentObject(inbox)
             .environmentObject(chatManager)
             .scaleEffect(message == nil ? 0.4:1)
             .position(x: finalX, y:  finalY)
             .animation(.spring(), value: message)
+            .animation(.spring(), value: finalX)
+
         } else {
             Spacer()
 //        return ZStack {
@@ -84,6 +86,10 @@ struct ChatView: View {
                     .ignoresSafeArea()
 
             }
+            .onAppear {
+                chatManager.fetchMessages(inbox: inbox)
+                chatManager.listenForChatChanges(inbox: inbox)
+            }
             .onTapGesture {
                 withAnimation(.spring()) {
                     chatManager.selectedMessage = nil
@@ -94,17 +100,23 @@ struct ChatView: View {
                     .opacity(chatManager.selectedMessage == nil ? 0:1)
             VStack {
                 if chatManager.selectedMessage == nil {
-                    ChatTextField(inbox: chatManager.inbox)
+                    ChatTextField(inbox: inbox)
+                        .environmentObject(chatManager)
                         .environmentObject(appearance)
 //                        .matchedGeometryEffect(id: "chatProfile-\(chatManager.inbox.id)", in: NamespaceWrapper.shared.namespace!)
                 }
                 
                 Spacer()
      
-                ChatInputView(inbox: chatManager.inbox)
+                ChatInputView(inbox: inbox)
+                    .environmentObject(chatManager)
                     .ignoresSafeArea()
                 }
             .ignoresSafeArea()
+            .onChange(of: chatManager.currentChatMode) { _, v in
+                let defaults = UserDefaults.standard
+                defaults.set(v.rawValue, forKey: "\(inbox.id)-chatmode")
+            }
        
         }
         .nonVibrantSecondaryBackground(cornerRadius: 0, colorScheme: colorScheme)
@@ -116,6 +128,7 @@ struct ChatView: View {
 struct MessagesView: View {
     
     @EnvironmentObject var chatManager: ChatManager
+
     @Environment (\.safeAreaInsets) var safeAreaInsets
     @Namespace var namespace
     
@@ -473,7 +486,7 @@ enum ChatContextMode {
 
 struct ChatTopView: View {
     @EnvironmentObject var appearance: AppearanceManager
-
+    @EnvironmentObject var inbox: Inbox
     @EnvironmentObject var viewModel: ChatManager
     @StateObject var navigationManager = NavigationManager.shared
     @Environment (\.dismiss) var dismiss
@@ -525,7 +538,7 @@ struct ChatTopView: View {
                                         .contentShape(Rectangle())
                                         .onTapGesture {
                                                 self.viewModel.reaction = emoji
-                                                self.viewModel.sendMessage()
+                                                self.viewModel.sendMessage(inbox: inbox)
                                         }
                                 }
                                 DismissButton {
@@ -643,7 +656,7 @@ struct ChatTopView: View {
 struct ChatInputView: View {
     
     @State var showAllOptions = false
-    @StateObject var viewModel: ChatManager
+    @StateObject var viewModel = ChatManager.shared
     @Environment (\.safeAreaInsets) var safeAreaInsets
 
     @StateObject private var audioRecorder: AudioRecorder = AudioRecorder()
@@ -663,17 +676,15 @@ struct ChatInputView: View {
     @FocusState var isFocused: Bool
     @State var isTyping = false
     
-    init(inbox: Inbox) {
-        self._viewModel = StateObject(wrappedValue: ChatManager(inbox))
-        
-    }
+    var inbox: Inbox
+    var reply: Message?
     
     var body: some View {
     
-            if let reply = viewModel.reply {
+            if let reply = reply {
                 VStack(alignment: reply.timestamp.profile.id == AccountManager.shared.currentProfile?.id ? .trailing:.leading) {
                     HStack {
-                        Text("Replying \((reply.timestamp.profile.id == AccountManager.shared.currentProfile?.id ? "yourself":(self.viewModel.inbox.members.first(where: {$0.id == reply.reply?.timestamp.profile.id })?.fullName ?? self.viewModel.inbox.name)) ?? "")")
+                        Text("Replying \((reply.timestamp.profile.id == AccountManager.shared.currentProfile?.id ? "yourself":(self.inbox.members.first(where: {$0.id == reply.reply?.timestamp.profile.id })?.fullName ?? self.inbox.name)) ?? "")")
 //                            .updateTitle()
                         Spacer()
                         Image(systemName: "xmark")
@@ -899,7 +910,7 @@ struct ChatInputView: View {
                 }
                 .showMediaPicker(isPresented: $showMediaPicker, type: .direct) { media in
                     viewModel.media = media
-                    viewModel.sendMessage()
+                    viewModel.sendMessage(inbox: inbox)
                 }
             //                .background(Blur())
             //                .cornerRadius(10)
@@ -943,7 +954,7 @@ struct ChatInputView: View {
                     audioRecorder.isRecording = true
                 }
             } else {
-                viewModel.sendMessage()
+                viewModel.sendMessage(inbox: inbox)
                 audioRecorder.removeRecording()
             }
         }

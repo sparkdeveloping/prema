@@ -34,31 +34,23 @@ class ChatManager: ObservableObject {
         }
     }
     @Published var reply: Message?
-    @Published var inbox: Inbox
     @Published var text = ""
     @Published var reaction: String?
     @Published var media: [Media] = []
     @Published var sticker: Media?
     @Published var showingStickerView: Bool = false
     @Published var location: Location?
-    @Published var currentChatMode: ChatMode = .regular {
-        didSet {
-            let defaults = UserDefaults.standard
-            defaults.set(currentChatMode.rawValue, forKey: "\(inbox.id)-chatmode")
-        }
-    }
+    @Published var currentChatMode: ChatMode = .regular
     @Published var messages: [Message] = []
+    
+    static var shared = ChatManager()
     
     var listeners: (ListenerRegistration?, ListenerRegistration?, ListenerRegistration?)
      var lastMessageDoc: DocumentSnapshot?
     
     let db = Firestore.firestore()
     
-    init(_ inbox: Inbox) {
-        self.inbox = inbox
-        self.fetchMessages()
-        self.listenForChatChanges()
-    }
+ 
     deinit {
            self.removeHandlers()
            
@@ -89,7 +81,9 @@ class ChatManager: ObservableObject {
 
     }
     
-    func sendMessage() {
+    func sendMessage(inbox: Inbox? = nil) {
+        
+        guard let inbox else { return }
         if let profile = AccountManager.shared.currentProfile {
         
             print("\n\n\n sending 1 \n\n\n\n")
@@ -100,37 +94,35 @@ class ChatManager: ObservableObject {
             
             var type: MessageType = .text
             
-            let message = Message(id: id, inboxID: self.inbox.id, type: type, media: nil, sticker: sticker, text: text.isEmpty ? nil:text, timestamp: timestamp, opened: [])
+            let message = Message(id: id, inboxID: inbox.id, type: type, media: nil, sticker: sticker, text: text.isEmpty ? nil:text, timestamp: timestamp, opened: [])
             
             print("\n\n\n sending 4 \n\n\n\n")
-            let inbox = Inbox(id: self.inbox.id, members: self.inbox.members, requests: self.inbox.requests, accepts: self.inbox.accepts, recentMessage: message, creationTimestamp: self.inbox.creationTimestamp, unreadDict: [:])
+            let inbox = Inbox(id: inbox.id, members: inbox.members, requests: inbox.requests, accepts: inbox.accepts, recentMessage: message, creationTimestamp: inbox.creationTimestamp, unreadDict: [:])
             
-            print("\n\n\n sending 5 \n\n\n\n \(self.inbox.dictionary.parseInbox().dictionary)")
+            print("\n\n\n sending 5 \n\n\n\n \(inbox.dictionary.parseInbox().dictionary)")
 
             var inboxDict = inbox.dictionary
             var messageDict = message.dictionary
             print("\n\n\n sending 6 \n\n\n\n")
             
             if media.isEmpty {
-                self.finalizeMessage(id: id, inboxDict: inboxDict, messageDict: messageDict)
+                self.finalizeMessage(id: id, inbox: inbox, inboxDict: inboxDict, messageDict: messageDict)
             } else {
                 StorageManager.uploadMedia(media: media, locationName: "direct") { dict in
                     messageDict["media"] = dict
-                    self.finalizeMessage(id: id, inboxDict: inboxDict, messageDict: messageDict)
+                    self.finalizeMessage(id: id, inbox: inbox, inboxDict: inboxDict, messageDict: messageDict)
                 } onError: { error in
                     message.isMessageSendError = true
                 }
 
             }
             
-           
-            self.inbox = inbox.dictionary.parseInbox()
         }
     }
     
-    func finalizeMessage(id: String, inboxDict: [String: Any], messageDict: [String: Any]) {
+    func finalizeMessage(id: String, inbox: Inbox, inboxDict: [String: Any], messageDict: [String: Any]) {
         let batch = db.batch()
-        batch.setData(inboxDict, forDocument: db.collection("inbox").document(self.inbox.id), merge: true)
+        batch.setData(inboxDict, forDocument: db.collection("inbox").document(inbox.id), merge: true)
 
         print("\n\n\n sending 7 \n\n\n\n")
         batch.setData(messageDict, forDocument: db.collection("inbox").document(inbox.id).collection("messages").document(id), merge: true)
@@ -142,12 +134,12 @@ class ChatManager: ObservableObject {
                 print("Error writing batch: \(error.localizedDescription)")
             } else {
                 print("Batch write successful")
-                inboxDict.parseInbox().notifications.processAndSendNotifications()
+                inboxDict.parseInbox().processAndSendNotifications()
             }
         }
     }
     
-    func fetchMessages() {
+    func fetchMessages(inbox: Inbox) {
         if let profile = AccountManager.shared.currentProfile {
             Firestore.firestore().collection("inbox").document(inbox.id).collection("messages").whereField("isDeleted", isEqualTo: false).order(by: "timestamp.time", descending: true).getDocuments { snapshot, error in
                 if let error {}
@@ -159,7 +151,7 @@ class ChatManager: ObservableObject {
         }
     }
     
-    func listenForChatChanges() {
+    func listenForChatChanges(inbox: Inbox) {
         if let profile = AccountManager.shared.currentProfile {
             Firestore.firestore().collection("inbox").document(inbox.id).collection("messages").addSnapshotListener { snapshot, error in
                 if let error {}

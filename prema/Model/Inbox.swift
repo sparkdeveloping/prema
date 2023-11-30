@@ -5,17 +5,18 @@
 //  Created by Denzel Nyatsanza on 11/7/23.
 //
 
+import Algorithms
 import Foundation
 
 class Inbox: ObservableObject, Identifiable, Comparable, Hashable {
     
-    init(id: String, members: [Profile], requests: [String], accepts: [String], displayName: String? = nil, displayAvatars: [Media]? = nil, recentMessage: Message? = nil, creationTimestamp: Timestamp, unreadDict: [String : Int?]) {
+    init(id: String, members: [Profile], requests: [String], accepts: [String], displayName: String? = nil, avatarImageURL: String? = nil, recentMessage: Message? = nil, creationTimestamp: Timestamp, unreadDict: [String : Int?]) {
         self.id = id
         self.members = members
         self.requests = requests
         self.accepts = accepts
         self.displayName = displayName
-        self.displayAvatars = displayAvatars
+        self.avatarImageURL = avatarImageURL
         self.recentMessage = recentMessage
         self.creationTimestamp = creationTimestamp
         self.unreadDict = unreadDict
@@ -38,14 +39,14 @@ class Inbox: ObservableObject, Identifiable, Comparable, Hashable {
     var requests: [String]
     var accepts: [String]
     var displayName: String?
-    var displayAvatars: [Media]?
+    var avatarImageURL: String?
     var avatar: String? {
-        if let displayAvatars, !displayAvatars.isEmpty {
-            return displayAvatars[0].imageURLString
+        if let displayName {
+            return displayName
         } else if let profile = self.members.first(where: {$0 != AccountManager.shared.currentProfile }) {
-            return profile.avatarImageURL
+            return profile.fullName
         }
-        return nil
+        return ""
     }
     var name: String {
         if let displayName {
@@ -82,25 +83,22 @@ extension [String: Any] {
         if let id {
             _id = id
         }
-        var displayName = self["displayName"] as? String
-        var displayAvatarsDict = self["displayAvatars"] as? [[String: Any]]
+        let displayName = self["displayName"] as? String
+        let avatarImageURL = self["avatarImageURL"] as? String
         
-        var displayAvatars: [Media] = []
-        if let displayAvatarsDict {
-            displayAvatars = displayAvatarsDict.map { $0.parseMedia() }
-        }
+   
         
         let membersDict = self["members"] as? [[String: Any]] ?? []
         let unreadDict = self["unread"] as? [String: Int?] ?? [:]
-        let requests = self["requests"] as? [String] ?? []
-        let accepts = self["accepts"] as? [String] ?? []
+        var requests = self["requests"] as? [String] ?? []
+        var accepts = self["accepts"] as? [String] ?? []
         let members = membersDict.map { $0.parseProfile() }
         let message = (self["recentMessage"] as? [String: Any])?.parseMessage()
         let creationTimestampDict = self["timestamp"] as? [String: Any] ?? [:]
         let creationTimestamp = creationTimestampDict.parseTimestamp()
         
         
-        return Inbox(id: _id, members: members, requests: requests, accepts: accepts, displayName: displayName, displayAvatars: displayAvatars, recentMessage: message, creationTimestamp: creationTimestamp, unreadDict: unreadDict)
+        return Inbox(id: _id, members: members, requests: requests.removingDuplicates(), accepts: accepts.removingDuplicates(), displayName: displayName, avatarImageURL: avatarImageURL, recentMessage: message, creationTimestamp: creationTimestamp, unreadDict: unreadDict)
     }
 }
 
@@ -124,23 +122,26 @@ extension Inbox {
     var dictionary: [String: Any] {
         
         var dict: [String: Any] = [:]
-
+        
         dict["id"] = self.id
+        if let name = self.displayName {
+            dict["displayName"] = name
+        }
+        if let image = self.avatarImageURL {
+            dict["avatarImageURL"] = image
+        }
         dict["members"] = self.members.map { $0.dictionary }
-        if let index = requests.firstIndex(where: { $0 == AccountManager.shared.currentProfile?.id }) {
-            var a = self.accepts
-            a.append(self.requests[index])
-            dict["accepts"] = a
-            var r = self.requests
-            dict["requests"] = r.remove(at: index)
-        } else {
-            dict["requests"] = self.requests
-            if let id = AccountManager.shared.currentProfile?.id {
-                var a = self.accepts
-                a.append(id)
-                dict["accepts"] = a
+       
+        if let profile = AccountManager.shared.currentProfile {
+            if let index = requests.firstIndex(where: {$0.id == profile.id }) {
+                self.accepts.append(profile.id)
+                self.requests.removeAll(where: {$0 == profile.id })
             }
         }
+        
+        dict["accepts"] = self.accepts
+        dict["requests"] = self.requests
+        
         if let message = self.recentMessage {
             dict["recentMessage"] = message.dictionary
         }
@@ -160,9 +161,7 @@ extension Inbox {
         if let displayName {
             dict["displayName"] = displayName
         }
-        if let displayAvatars {
-            dict["displayAvatars"] = displayAvatars.map { $0.dictionary }
-        }
+     
         return dict
     }
 }

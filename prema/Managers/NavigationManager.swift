@@ -51,5 +51,7 @@ class NavigationManager: ObservableObject {
     @Published var selectedTab: Tab = .profile
 
     @Published var showNewVision = false
-    @Published var showNewTask = false
+    @Published var showNewTaskVision: Vision?
+    
+    @Published var notificationInboxID: String?
 }

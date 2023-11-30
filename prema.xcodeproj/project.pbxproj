@@ -76,6 +76,10 @@
 		DBA2C59B2B0F940C00893CF1 /* VideoPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = DBA2C59A2B0F940C00893CF1 /* VideoPlayer */; };
 		DBA2C5DA2B0F9CB600893CF1 /* MediaPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA2C5D92B0F9CB600893CF1 /* MediaPicker.swift */; };
 		DBA2C5DD2B0FA98500893CF1 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA2C5DC2B0FA98500893CF1 /* CameraView.swift */; };
+		DBA537512B18619600029606 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = DBA537502B18619600029606 /* Algorithms */; };
+		DBA537592B18846D00029606 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA537582B18846D00029606 /* NotificationService.swift */; };
+		DBA5375D2B18846D00029606 /* premaNotification.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DBA537562B18846D00029606 /* premaNotification.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		DBA537642B1887F200029606 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = DBA537632B1887F200029606 /* FirebaseMessaging */; };
 		DBAEE9432B0A84FC00AF1BE2 /* Ref.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBAEE9422B0A84FC00AF1BE2 /* Ref.swift */; };
 		DBAEE9452B0A860500AF1BE2 /* CreateStickerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBAEE9442B0A860500AF1BE2 /* CreateStickerViewModel.swift */; };
 		DBAEE9492B0A92F500AF1BE2 /* ViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBAEE9482B0A92F500AF1BE2 /* ViewExtensions.swift */; };
@@ -117,6 +121,30 @@
 		DBE49AEC2B0ECE14005FBFD1 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBE49AEA2B0ECE13005FBFD1 /* CameraManager.swift */; };
 		DBFA05092AFBB47D008985A7 /* AlgoliaSearchClient in Frameworks */ = {isa = PBXBuildFile; productRef = DBFA05082AFBB47D008985A7 /* AlgoliaSearchClient */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		DBA5375B2B18846D00029606 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DB2F8A172AB687F100713B5B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DBA537552B18846D00029606;
+			remoteInfo = premaNotification;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		DBA537612B18846D00029606 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				DBA5375D2B18846D00029606 /* premaNotification.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		DB0080F32AF4201B00C085C8 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
@@ -160,6 +188,9 @@
 		DB6DC97E2AC8312200F381CF /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		DBA2C5D92B0F9CB600893CF1 /* MediaPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaPicker.swift; sourceTree = "<group>"; };
 		DBA2C5DC2B0FA98500893CF1 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		DBA537562B18846D00029606 /* premaNotification.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = premaNotification.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		DBA537582B18846D00029606 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		DBA5375A2B18846D00029606 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DBAEE9422B0A84FC00AF1BE2 /* Ref.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Ref.swift; sourceTree = "<group>"; };
 		DBAEE9442B0A860500AF1BE2 /* CreateStickerViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateStickerViewModel.swift; sourceTree = "<group>"; };
 		DBAEE9482B0A92F500AF1BE2 /* ViewExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewExtensions.swift; sourceTree = "<group>"; };
@@ -218,6 +249,7 @@
 				DB013FE72AF55FDF0053A376 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
 				DBA2C5982B0F92C500893CF1 /* YPImagePicker in Frameworks */,
 				DB013FED2AF55FDF0053A376 /* FirebaseAuth in Frameworks */,
+				DBA537512B18619600029606 /* Algorithms in Frameworks */,
 				DB013FF12AF55FDF0053A376 /* FirebaseCrashlytics in Frameworks */,
 				DB0140112AF55FDF0053A376 /* FirebaseRemoteConfigSwift in Frameworks */,
 				DB0140032AF55FDF0053A376 /* FirebaseInAppMessaging-Beta in Frameworks */,
@@ -240,6 +272,14 @@
 				DB013FFB2AF55FDF0053A376 /* FirebaseFirestoreCombine-Community in Frameworks */,
 				DB01400B2AF55FDF0053A376 /* FirebaseMessaging in Frameworks */,
 				DB0140072AF55FDF0053A376 /* FirebaseInstallations in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DBA537532B18846D00029606 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DBA537642B1887F200029606 /* FirebaseMessaging in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -347,7 +387,9 @@
 			isa = PBXGroup;
 			children = (
 				DB2F8A212AB687F100713B5B /* prema */,
+				DBA537572B18846D00029606 /* premaNotification */,
 				DB2F8A202AB687F100713B5B /* Products */,
+				DBA537622B1887F200029606 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -355,6 +397,7 @@
 			isa = PBXGroup;
 			children = (
 				DB2F8A1F2AB687F100713B5B /* prema.app */,
+				DBA537562B18846D00029606 /* premaNotification.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -424,6 +467,22 @@
 			path = Camera;
 			sourceTree = "<group>";
 		};
+		DBA537572B18846D00029606 /* premaNotification */ = {
+			isa = PBXGroup;
+			children = (
+				DBA537582B18846D00029606 /* NotificationService.swift */,
+				DBA5375A2B18846D00029606 /* Info.plist */,
+			);
+			path = premaNotification;
+			sourceTree = "<group>";
+		};
+		DBA537622B1887F200029606 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		DBB0514A2B0483220008A002 /* Notifications */ = {
 			isa = PBXGroup;
 			children = (
@@ -476,10 +535,12 @@
 				DB2F8A1B2AB687F100713B5B /* Sources */,
 				DB2F8A1C2AB687F100713B5B /* Frameworks */,
 				DB2F8A1D2AB687F100713B5B /* Resources */,
+				DBA537612B18846D00029606 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				DBA5375C2B18846D00029606 /* PBXTargetDependency */,
 			);
 			name = prema;
 			packageProductDependencies = (
@@ -519,10 +580,31 @@
 				DBE49AC32B0ECBF1005FBFD1 /* ARVideoKit */,
 				DBA2C5972B0F92C500893CF1 /* YPImagePicker */,
 				DBA2C59A2B0F940C00893CF1 /* VideoPlayer */,
+				DBA537502B18619600029606 /* Algorithms */,
 			);
 			productName = prema;
 			productReference = DB2F8A1F2AB687F100713B5B /* prema.app */;
 			productType = "com.apple.product-type.application";
+		};
+		DBA537552B18846D00029606 /* premaNotification */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DBA5375E2B18846D00029606 /* Build configuration list for PBXNativeTarget "premaNotification" */;
+			buildPhases = (
+				DBA537522B18846D00029606 /* Sources */,
+				DBA537532B18846D00029606 /* Frameworks */,
+				DBA537542B18846D00029606 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = premaNotification;
+			packageProductDependencies = (
+				DBA537632B1887F200029606 /* FirebaseMessaging */,
+			);
+			productName = premaNotification;
+			productReference = DBA537562B18846D00029606 /* premaNotification.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -537,6 +619,9 @@
 					DB2F8A1E2AB687F100713B5B = {
 						CreatedOnToolsVersion = 15.0;
 						LastSwiftMigration = 1500;
+					};
+					DBA537552B18846D00029606 = {
+						CreatedOnToolsVersion = 15.0.1;
 					};
 				};
 			};
@@ -559,12 +644,14 @@
 				DBE49AC22B0ECBF1005FBFD1 /* XCRemoteSwiftPackageReference "ARVideoKit" */,
 				DBA2C5962B0F92C500893CF1 /* XCRemoteSwiftPackageReference "YPImagePicker" */,
 				DBA2C5992B0F940C00893CF1 /* XCRemoteSwiftPackageReference "VideoPlayer" */,
+				DBA5374F2B18619600029606 /* XCRemoteSwiftPackageReference "swift-algorithms" */,
 			);
 			productRefGroup = DB2F8A202AB687F100713B5B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				DB2F8A1E2AB687F100713B5B /* prema */,
+				DBA537552B18846D00029606 /* premaNotification */,
 			);
 		};
 /* End PBXProject section */
@@ -581,6 +668,13 @@
 				DB6DC9982AC8312400F381CF /* Preview Assets.xcassets in Resources */,
 				DB6DC9932AC8312400F381CF /* Assets.xcassets in Resources */,
 				DB1060C52AFD289E00ABFBDC /* Launch Screen.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DBA537542B18846D00029606 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -660,7 +754,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DBA537522B18846D00029606 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DBA537592B18846D00029606 /* NotificationService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DBA5375C2B18846D00029606 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DBA537552B18846D00029606 /* premaNotification */;
+			targetProxy = DBA5375B2B18846D00029606 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		DB2F8A2B2AB687F500713B5B /* Debug */ = {
@@ -785,6 +895,7 @@
 		DB2F8A2E2AB687F500713B5B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
@@ -797,6 +908,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = prema/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "To take photos and videos for your profile or posts";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "To use ride module and share location when necessary";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "To record audio for videos and voice notes";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "To pick photos and videos for your profile or posts";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -823,6 +935,7 @@
 		DB2F8A2F2AB687F500713B5B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
@@ -835,6 +948,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = prema/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "To take photos and videos for your profile or posts";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "To use ride module and share location when necessary";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "To record audio for videos and voice notes";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "To pick photos and videos for your profile or posts";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -857,6 +971,56 @@
 			};
 			name = Release;
 		};
+		DBA5375F2B18846D00029606 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K48G99PWNM;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = premaNotification/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = premaNotification;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.prema.premaNotification;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		DBA537602B18846D00029606 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K48G99PWNM;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = premaNotification/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = premaNotification;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.prema.premaNotification;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -874,6 +1038,15 @@
 			buildConfigurations = (
 				DB2F8A2E2AB687F500713B5B /* Debug */,
 				DB2F8A2F2AB687F500713B5B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DBA5375E2B18846D00029606 /* Build configuration list for PBXNativeTarget "premaNotification" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DBA5375F2B18846D00029606 /* Debug */,
+				DBA537602B18846D00029606 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -919,6 +1092,14 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.2.4;
+			};
+		};
+		DBA5374F2B18619600029606 /* XCRemoteSwiftPackageReference "swift-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-algorithms.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
 			};
 		};
 		DBB051512B05DF0F0008A002 /* XCRemoteSwiftPackageReference "DSWaveformImage" */ = {
@@ -1110,6 +1291,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DBA2C5992B0F940C00893CF1 /* XCRemoteSwiftPackageReference "VideoPlayer" */;
 			productName = VideoPlayer;
+		};
+		DBA537502B18619600029606 /* Algorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DBA5374F2B18619600029606 /* XCRemoteSwiftPackageReference "swift-algorithms" */;
+			productName = Algorithms;
+		};
+		DBA537632B1887F200029606 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DB013FDF2AF55FDF0053A376 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
 		};
 		DBB051522B05DF0F0008A002 /* DSWaveformImage */ = {
 			isa = XCSwiftPackageProductDependency;
