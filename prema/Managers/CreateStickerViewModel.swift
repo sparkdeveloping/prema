@@ -12,7 +12,7 @@ import CoreImage
 import CoreImage.CIFilterBuiltins
 import FirebaseFirestore
 
-/*
+
 class CreateStickerViewModel: ObservableObject{
     // MARK: Image Picker Properties
     @Published var showPicker: Bool = false
@@ -27,22 +27,19 @@ class CreateStickerViewModel: ObservableObject{
     
     func uploadSticker(inbox: String, completion: @escaping (Error?) -> Void) {
 //        SharedDataManager.shared.isloading = true
+        guard let profile = AccountManager.shared.currentProfile else { return }
         if let fetchedImage, !text.isEmpty {
             
             
             let media = Media(uiImage: fetchedImage)
             
-            Api.Storage.uploadMedia(type: .sticker, media: [media]) { progress in
-                //
-            } onSuccess: { mediaDict in
+            StorageManager.uploadMedia(media: [media], locationName: "stickers") { mediaDict in
                 mediaDict.forEach { dict in
                     
                     var data: [String: Any] = dict
                     data["name"] = self.text
-                    data["timestamp"] = Date.now.timeIntervalSince1970
                     data["inboxID"] = inbox
-                    data["profile"] =
-                    SharedDataManager.shared.currentProfile?.dictionary
+                    data["timestamp"] = Timestamp(profile: profile, time: Date.now.timeIntervalSince1970).dictionary
                     
                     
                     Ref.firestoreDb.collection("stickers").addDocument(data: data) { error in
@@ -50,8 +47,8 @@ class CreateStickerViewModel: ObservableObject{
                             print("error uploading sticker: \(error.localizedDescription)")
                         }
                         
-                        SharedDataManager.shared.isloading = false
-//                        SharedDataManager.shared.fetchStickers()
+//                        SharedDataManager.shared.isloading = false
+                        DirectManager.shared.fetchStickers()
                         completion(nil)
                     }
                     
@@ -59,7 +56,7 @@ class CreateStickerViewModel: ObservableObject{
             } onError: { error in
                 print("error uploading sticker image: \(error)")
 
-                SharedDataManager.shared.isloading = false
+//                SharedDataManager.shared.isloading = false
             }
 
             
@@ -71,7 +68,7 @@ class CreateStickerViewModel: ObservableObject{
     
     func extractImage(){
         if let pickedItem{
-            Task{
+            SwiftUI.Task{
                 guard let imageData = try? await pickedItem.loadTransferable(type: Data.self) else{return}
                 let image = UIImage(data: imageData)
                 await MainActor.run(body: {
@@ -132,4 +129,4 @@ class CreateStickerViewModel: ObservableObject{
         }
     }
 }
-*/
+

@@ -59,7 +59,7 @@ class StorageManager {
                 }
             case .audio:
                 if let urlString = item.audioURLString, let url = URL(string: urlString) {
-                    self.uploadVideoOrAudioToFirebaseStorage(location: locationName, videoURL: url, videoName: item.id) { url in
+                    self.uploadVideoOrAudioToFirebaseStorage(location: locationName, audioURL: url, videoName: item.id) { url in
                         
                         dict.append(["audioURL":url])
                         if index == media.count - 1 {
@@ -76,13 +76,13 @@ class StorageManager {
         
     }
     
-    static func uploadVideoOrAudioToFirebaseStorage(location: String, videoURL: URL, videoName: String, onSuccess: @escaping (String) -> (), onError: @escaping (String) -> ()) {
+    static func uploadVideoOrAudioToFirebaseStorage(location: String, videoURL: URL? = nil, audioURL: URL? = nil, videoName: String, onSuccess: @escaping (String) -> (), onError: @escaping (String) -> ()) {
         let storage = Storage.storage()
         let storageReference = storage.reference()
+        guard let url = videoURL ?? audioURL else { return }
+        let videoReference = storageReference.child("\(location)/\(videoURL == nil ? "audio":"video")\(videoName).\(videoURL == nil ? "m4a":"mp4")")
         
-        let videoReference = storageReference.child("\(location)/\(videoName)")
-        
-        videoReference.putFile(from: videoURL, metadata: nil) { (metadata, error) in
+        videoReference.putFile(from: url, metadata: nil) { (metadata, error) in
             if let error = error {
                 print("Error uploading video: \(error)")
             } else {

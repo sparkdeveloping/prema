@@ -44,19 +44,24 @@ class Inbox: ObservableObject, Identifiable, Comparable, Hashable {
         if let displayName {
             return displayName
         } else if let profile = self.members.first(where: {$0 != AccountManager.shared.currentProfile }) {
-            return profile.fullName
+            return profile.avatarImageURL
         }
         return ""
     }
     var name: String {
         if let displayName {
-            return displayName
+            print("this is the one rendered 1: \(displayName)")
+            return self.isGroup ? displayName:displayName.formattedName(from: members.map { $0.fullName })
+        } else if isGroup {
+            return members.map { ($0.fullName.first ?? "X").uppercased() }.reduce("") { "\($0)" + $1 }
         } else if let profile = self.members.first(where: {$0 != AccountManager.shared.currentProfile }) {
-            return profile.fullName
+            print("this is the one rendered 2: \(profile.fullName)")
+            return profile.fullName.formattedName(from: members.map { $0.fullName })
         }
         return ""
     }
-    
+    @Published var status: ActivityStatus = .init()
+
     @Published var recentMessage: Message?
     var creationTimestamp: Timestamp
     var isGroup: Bool {
@@ -90,8 +95,8 @@ extension [String: Any] {
         
         let membersDict = self["members"] as? [[String: Any]] ?? []
         let unreadDict = self["unread"] as? [String: Int?] ?? [:]
-        var requests = self["requests"] as? [String] ?? []
-        var accepts = self["accepts"] as? [String] ?? []
+        let requests = self["requests"] as? [String] ?? []
+        let accepts = self["accepts"] as? [String] ?? []
         let members = membersDict.map { $0.parseProfile() }
         let message = (self["recentMessage"] as? [String: Any])?.parseMessage()
         let creationTimestampDict = self["timestamp"] as? [String: Any] ?? [:]
@@ -124,18 +129,22 @@ extension Inbox {
         var dict: [String: Any] = [:]
         
         dict["id"] = self.id
-        if let name = self.displayName {
-            dict["displayName"] = name
-        }
+  
         if let image = self.avatarImageURL {
             dict["avatarImageURL"] = image
         }
         dict["members"] = self.members.map { $0.dictionary }
        
         if let profile = AccountManager.shared.currentProfile {
-            if let index = requests.firstIndex(where: {$0.id == profile.id }) {
+            if requests.contains(where: {$0.id == profile.id }) {
                 self.accepts.append(profile.id)
                 self.requests.removeAll(where: {$0 == profile.id })
+            }
+        }
+        
+        if let profile = AccountManager.shared.currentProfile {
+            if !accepts.contains(where: {$0.id == profile.id }) {
+                self.accepts.append(profile.id)
             }
         }
         
@@ -163,5 +172,39 @@ extension Inbox {
         }
      
         return dict
+    }
+}
+
+struct Sticker: Identifiable, Codable {
+    var id: String = UUID().uuidString
+    var imageURLString: String?
+    var inboxID: String?
+    var timestamp: Timestamp
+    
+
+    var dictionary: [String: Any] {
+        var dict: [String: Any] = [:]
+        
+        dict["id"] = self.id
+        dict["imageURLString"] = self.imageURLString
+        dict["timestamp"] = self.timestamp.dictionary
+        dict["inboxID"] = self.inboxID
+        
+        return dict
+    }
+}
+
+extension [String: Any] {
+    func parseSticker(id: String? = nil) -> Sticker {
+        var _id = self["id"] as? String ?? UUID().uuidString
+        if let id {
+            _id = id
+        }
+        let timestamp = (self["timestamp"] as? [String: Any] ?? [:]).parseTimestamp()
+        let imageURLString = self["imageURL"] as? String ?? ""
+        let inboxID = self["inboxID"] as? String
+        
+        return .init(id: _id, imageURLString: imageURLString, inboxID: inboxID, timestamp: timestamp)
+        
     }
 }

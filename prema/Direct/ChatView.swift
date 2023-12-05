@@ -7,17 +7,10 @@
 
 import AVFoundation
 import DSWaveformImage
+import VideoPlayer
 import DSWaveformImageViews
 import SwiftUI
 import Combine
-
-struct SelectedInbox: Identifiable {
-    var id: String {
-        return inbox.id
-    }
-    var inbox: Inbox
-    var frame: CGRect
-}
 
 struct ChatView: View {
     
@@ -25,10 +18,9 @@ struct ChatView: View {
     @Environment (\.colorScheme) var colorScheme
     @EnvironmentObject var appearance: AppearanceManager
     @EnvironmentObject var navigation: NavigationManager
-    @StateObject var chatManager = ChatManager()
+    @EnvironmentObject var chatManager: ChatManager
     @Namespace var namespace
-    @ObservedObject var inbox: Inbox
-    @StateObject var statusViewModel = ActivityStatusViewModel()
+    @StateObject var statusViewModel = ActivityStatusManager()
 
     var GodIsGood = true
     @State var headerFrame: CGRect = .zero
@@ -54,11 +46,10 @@ struct ChatView: View {
             let finalY = message == nil ? (safeAreaInsets.top):y
             let finalX = message == nil ? (appearance.size.width / 2):right ? rX:lX
             
-            ChatTopView(reply: $reply) { frame in
+            ChatContextView() { frame in
                 headerFrame = frame
             }
             //        .matchedGeometryEffect(id: "chatProfile-\(chatManager.inbox.id)", in: NamespaceWrapper.shared.namespace!)
-            .environmentObject(inbox)
             .environmentObject(chatManager)
             .environmentObject(statusViewModel)
             .scaleEffect(message == nil ? 0.4:1)
@@ -88,12 +79,14 @@ struct ChatView: View {
                     .environmentObject(chatManager)
                     .opacity(chatManager.reply == nil ? 1:0.1)
                     .ignoresSafeArea()
+                    .simultaneousGesture(TapGesture().onEnded { _ in hideKeyboard()})
 
             }
             .onAppear {
-                chatManager.fetchMessages(inbox: inbox)
-                chatManager.listenForChatChanges(inbox: inbox)
+                chatManager.fetchMessages()
+                chatManager.listenForChatChanges()
             }
+         
             .onTapGesture {
                 withAnimation(.spring()) {
                     chatManager.selectedMessage = nil
@@ -102,26 +95,29 @@ struct ChatView: View {
                 chatContextMenuAndHeader
                     .opacity(chatManager.reply == nil ? 1:0.1)
                     .opacity(chatManager.selectedMessage == nil ? 0:1)
+                    .simultaneousGesture(TapGesture().onEnded { _ in hideKeyboard()})
+
             VStack {
                 if chatManager.selectedMessage == nil {
-                    ChatTextField(inbox: inbox)
+                    ChatTextField()
                         .environmentObject(chatManager)
                         .environmentObject(appearance)
                         .environmentObject(statusViewModel)
+                        .simultaneousGesture(TapGesture().onEnded { _ in hideKeyboard()})
 
 //                        .matchedGeometryEffect(id: "chatProfile-\(chatManager.inbox.id)", in: NamespaceWrapper.shared.namespace!)
                 }
                 
                 Spacer()
      
-                ChatInputView(inbox: inbox)
+                ChatInputView()
                     .environmentObject(chatManager)
                     .ignoresSafeArea()
                 }
             .ignoresSafeArea()
             .onChange(of: chatManager.currentChatMode) { _, v in
                 let defaults = UserDefaults.standard
-                defaults.set(v.rawValue, forKey: "\(inbox.id)-chatmode")
+                defaults.set(v.rawValue, forKey: "\(chatManager.inbox.id)-chatmode")
             }
        
         }
@@ -134,6 +130,7 @@ struct ChatView: View {
 struct MessagesView: View {
     
     @EnvironmentObject var chatManager: ChatManager
+    
 
     @Environment (\.safeAreaInsets) var safeAreaInsets
     @Namespace var namespace
@@ -144,6 +141,7 @@ struct MessagesView: View {
                 LazyVStack {
                     ForEach(chatManager.messages) { message in
                         ChatBubble(message: message, namespace: _namespace)
+                            
                             .matchedGeometryEffect(id: "chat-bubble-\(message.id)", in: namespace)
                             .horizontalPadding(-20)
                             .listRowBackground(Color.clear)
@@ -153,7 +151,8 @@ struct MessagesView: View {
                 .padding(.top, safeAreaInsets.top + 50)
                 .padding(.bottom, 50)
             }
-            .scrollDismissesKeyboard(.immediately)
+            .scrollIndicators(.hidden)
+            .scrollDismissesKeyboard(.interactively)
             .rotationEffect(Angle(degrees: 180))
             .background(Color.clear)
             .scrollContentBackground(.hidden)
@@ -169,6 +168,8 @@ struct ChatBubble: View {
     @EnvironmentObject var appearance: AppearanceManager
     @Environment (\.colorScheme) var colorScheme
     @ObservedObject var message: Message
+    @StateObject var namespacee = NamespaceWrapper.shared
+
     @StateObject private var audioPlayerManager: AudioPlayerManager = AudioPlayerManager()
     @EnvironmentObject var viewModel: ChatManager
     @Namespace var namespace
@@ -176,6 +177,8 @@ struct ChatBubble: View {
         return message.type
     }
     
+    @StateObject var navigation = NavigationManager.shared
+
     var showRecentTimestamp: Bool {
         if let firstIndex = viewModel.messages.firstIndex(of: message), firstIndex != (viewModel.messages.count - 1) {
             if message.timestamp.time - viewModel.messages[firstIndex + 1].timestamp.time < 300 {
@@ -185,6 +188,15 @@ struct ChatBubble: View {
         return true
     }
     @State var isLongPressing = false
+    
+    var fromMe: Bool {
+        return message.timestamp.profile.id == AccountManager.shared.currentProfile?.id
+    }
+    
+    var inbox: Inbox {
+        return viewModel.inbox
+    }
+    
     var body: some View {
         VStack {
             
@@ -195,14 +207,22 @@ struct ChatBubble: View {
                 
             }
           
-            HStack {
+            HStack(alignment: .top) {
                 if message.timestamp.profile.id == AccountManager.shared.currentProfile?.id && !message.isReply {
                     Spacer(minLength: 0.25 * appearance.size.width)
                 }
                 
-                
+                if inbox.isGroup && !fromMe {
+                    ProfileImageView(avatarImageURL: message.timestamp.profile.avatarImageURL)
+                        .frame(width: 34, height: 34)
+                }
                
-                VStack(alignment: message.timestamp.profile.id == AccountManager.shared.currentProfile?.id ? .trailing:.leading) {
+                VStack(alignment: fromMe ? .trailing:.leading) {
+                    if inbox.isGroup && !fromMe {
+                        Text(message.timestamp.profile.fullName.formattedName(from: inbox.members.map{$0.fullName}))
+                            .font(.caption2)
+                            .roundedFont()
+                    }
                         if let reply = message.reply, !self.message.isReply{
                         HStack {
                           
@@ -261,6 +281,13 @@ struct ChatBubble: View {
                                                         .resizable()
                                                         .scaledToFill()
                                                 }
+                                                if media[i].type == .video {
+                                                    Image(systemName: "play.fill")
+                                                        .font(.largeTitle.bold())
+                                                        .padding(10)
+                                                        .background(.regularMaterial)
+                                                        .clipShape(.rect(cornerRadius: 22, style: .continuous))
+                                                }
                                             }
 //                                            .frame(width: (appearance.size.width - 40) * 0.75 * media[i].ratio,
 //                                                   height: (appearance.size.width - 40) * 0.75)
@@ -268,9 +295,11 @@ struct ChatBubble: View {
                                             .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 0)
                                             .padding(-20)
                                             //                                        .offset(x: -i * 5, y: -i * 5)
+                                           
                                         }
                                     }
-                                    
+                                    .matchedGeometryEffect(id: "mediaplayer-\(media[0].id)", in: namespacee.namespace!)
+
                                 }
                             case .sticker:
                                 ZStack {
@@ -289,7 +318,7 @@ struct ChatBubble: View {
                     .padding(.vertical ,message.type == .sticker ? 0:10)
                     .padding(.horizontal, message.type == .sticker ? 0:20)
                     .background(BubbleBackground.opacity(message.type == .sticker ? 0:1))
-                    .cornerRadius(22)
+                    .clipShape(.rect(cornerRadii: .init(topLeading: fromMe ? 22:7, bottomLeading: 22, bottomTrailing: fromMe ? 7:22, topTrailing: 22)))
                     .shadow(color: Color("Shadoww"), radius: 10, x: 0, y: 0)
                     .overlay(
                         GeometryReader { geometry in
@@ -304,12 +333,19 @@ struct ChatBubble: View {
                             
                         }
                     )
-                    .simultaneousGesture(LongPressGesture().onEnded({ _ in
-                        self.isLongPressing.toggle()
-                        haptic()
-                    }))
-                    .opacity(viewModel.selectedMessage == nil ? 1:viewModel.selectedMessage != message ? 0.1:1)
-           
+                    .onTapGesture {
+                        
+                        if let media = message.media {
+                            withAnimation(.spring) {
+                                navigation.media = media
+                            }
+                        }
+                        
+                    }.onScalingLongPress {                       self.isLongPressing.toggle()
+                        self.haptic()
+                    }
+                    
+                  
                     if viewModel.messages.first?.id == message.id && message.timestamp.profile.id == AccountManager.shared.currentProfile?.id  && !message.isReply {
                         Text(message.timestamp.time.chatTime)
                             .font(.caption)
@@ -318,13 +354,13 @@ struct ChatBubble: View {
                     }
             
                 }
-                
+               
                 
                 if message.timestamp.profile.id != AccountManager.shared.currentProfile?.id && !message.isReply {
                     Spacer(minLength: 0.25 * appearance.size.width)
                 }
             }
-      
+            .opacity(viewModel.selectedMessage == nil ? 1:viewModel.selectedMessage != message ? 0.1:1)
         }
         .rotationEffect(Angle(degrees: 180))
         .opacity(message.isSent ? 1:0.5)
@@ -353,7 +389,6 @@ struct ChatBubble: View {
                         LinearGradient(colors: fromColors, startPoint: .topLeading, endPoint: .bottomTrailing)
                     case .sticker, .image, .video:
                         Color.clear
-
                     }
                 }  else {
                     switch type {
@@ -407,9 +442,12 @@ struct ChatBubble: View {
 
 struct ChatFunCenterView: View {
     @Environment (\.colorScheme) var colorScheme
-    @StateObject var directViewModel = DirectManager.shared
+    @StateObject var directManager = DirectManager.shared
     @EnvironmentObject var viewModel: ChatManager
-    
+    var inbox: Inbox {
+        return viewModel.inbox
+    }
+
     var body: some View {
        
             VStack {
@@ -426,15 +464,16 @@ struct ChatFunCenterView: View {
                         .padding(.horizontal, 10)
                         .vibrantBackground(cornerRadius: 24, colorScheme: colorScheme)
                         .onTapGesture {
-//                            NavigationManager.shared.path.append("create-sticker")
+                            NavigationManager.shared.path.append("create-sticker|\(inbox.id)")
+                            viewModel.showingStickerView = false
                         }
                     DismissButton {
                         viewModel.showingStickerView.toggle()
                     }
                 }
-                 /*
+       
                 Divider()
-                if directViewModel.stickers.isEmpty {
+                if directManager.stickers.isEmpty {
                     ContentUnavailableView {
                         Color.clear
 //                        EmptyPostsView(message: "")
@@ -443,7 +482,8 @@ struct ChatFunCenterView: View {
                     } actions: {
                         
                         Button("Create") {
-                            NavigationManager.shared.path.append("create-sticker")
+                            NavigationManager.shared.path.append("create-sticker|\(inbox.id)")
+                            viewModel.showingStickerView = false
                         }
                     }
 
@@ -453,9 +493,9 @@ struct ChatFunCenterView: View {
                         LazyVGrid(columns: [.init(.flexible(), spacing: 5),
                                             .init(.flexible(), spacing: 5),
                                             .init(.flexible(), spacing: 5)]) {
-                                                ForEach(directViewModel.stickers) { sticker in
+                                                ForEach(directManager.stickers) { sticker in
                                                     
-                                                    ImageX(sticker.imageURL)
+                                                    ImageX(urlString: sticker.imageURLString)
                                                         .frame(width: (AppearanceManager.shared.size.width - 70) / 3, height: (AppearanceManager.shared.size.width - 70) / 3)
                                                         .onTapGesture {
                                                             viewModel.sticker = sticker
@@ -468,7 +508,7 @@ struct ChatFunCenterView: View {
                     }
                     .frame(width: AppearanceManager.shared.size.width - 60, height: AppearanceManager.shared.size.width - 60)
                 }
-                  */
+              
             }
   
             .padding(10)
@@ -491,15 +531,15 @@ enum ChatContextMode {
     case info, reactions, reply, forward
 }
 
-struct ChatTopView: View {
+struct ChatContextView: View {
     @EnvironmentObject var appearance: AppearanceManager
-    @EnvironmentObject var inbox: Inbox
+    
     @EnvironmentObject var viewModel: ChatManager
     @StateObject var navigationManager = NavigationManager.shared
     @Environment (\.dismiss) var dismiss
     @Environment (\.safeAreaInsets) var safeAreaInsets
     @Namespace var namespace
-    @Binding var reply: Message?
+
     var frame: (CGRect) -> ()
     
     enum ChatTopViewMode {
@@ -510,7 +550,6 @@ struct ChatTopView: View {
     var mode: ChatTopViewMode {
         return viewModel.selectedMessage == nil ? .header:.context
     }
-    @EnvironmentObject var statusViewModel: ActivityStatusViewModel
 
     var emojis: [String] {
         var array: [String] = []
@@ -541,11 +580,11 @@ struct ChatTopView: View {
                             HStack {
                                 ForEach(emojis.prefix(5), id: \.self) { emoji in
                                     Text(emoji)
-                                        .font(.system(size: 40))
+                                        .font(.system(size: 34))
                                         .contentShape(Rectangle())
                                         .onTapGesture {
                                                 self.viewModel.reaction = emoji
-                                                self.viewModel.sendMessage(inbox: inbox)
+                                                self.viewModel.sendMessage()
                                         }
                                 }
                                 DismissButton {
@@ -560,7 +599,7 @@ struct ChatTopView: View {
                                     ForEach(emojis, id: \.self) { emoji in
                                         
                                         Text(emoji)
-                                            .font(.system(size: 40))
+                                            .font(.system(size: 34))
                                             .contentShape(Rectangle())
                                             .onTapGesture {
                                                 
@@ -609,8 +648,11 @@ struct ChatTopView: View {
                                 .onTapGesture {
                                     withAnimation(.spring()) {
                                         
-                                        reply = self.viewModel.selectedMessage
+                                        self.viewModel.reply = viewModel.selectedMessage
+                                        print("reply message is: \(self.viewModel.reply)")
                                         viewModel.selectedMessage = nil
+                                        print("reply message is: \(self.viewModel.reply)")
+
                                     }
                                 }
                             Divider()
@@ -653,9 +695,7 @@ struct ChatTopView: View {
         )
         .padding(.horizontal)
         .padding(.top, safeAreaInsets.top)
-        .onAppear {
-            self.statusViewModel.getStatus(inbox: inbox)
-        }
+       
     }
     
 }
@@ -663,7 +703,7 @@ struct ChatTopView: View {
 struct ChatInputView: View {
     
     @State var showAllOptions = false
-    @StateObject var viewModel = ChatManager.shared
+    @EnvironmentObject var viewModel: ChatManager
     @Environment (\.safeAreaInsets) var safeAreaInsets
 
     @StateObject private var audioRecorder: AudioRecorder = AudioRecorder()
@@ -683,22 +723,25 @@ struct ChatInputView: View {
     @FocusState var isFocused: Bool
     @State var isTyping = false
     
-    var inbox: Inbox
-    var reply: Message?
+    var inbox: Inbox {
+        return viewModel.inbox
+    }
     
     var body: some View {
     
-            if let reply = reply {
+        VStack {
+            if let reply = self.viewModel.reply {
                 VStack(alignment: reply.timestamp.profile.id == AccountManager.shared.currentProfile?.id ? .trailing:.leading) {
                     HStack {
                         Text("Replying \((reply.timestamp.profile.id == AccountManager.shared.currentProfile?.id ? "yourself":(self.inbox.members.first(where: {$0.id == reply.reply?.timestamp.profile.id })?.fullName ?? self.inbox.name)) ?? "")")
-//                            .updateTitle()
+                            .font(.caption)
+                            .italic()
+                            .roundedFont()
+                        //                            .updateTitle()
                         Spacer()
                         Image(systemName: "xmark")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 20, height: 20)
-                            .contentShape(Rectangle())
+                            .fontWeight(.bold)
+                            .contentShape(.rect)
                             .onTapGesture {
                                 withAnimation(.spring()) {
                                     viewModel.reply = nil
@@ -706,10 +749,10 @@ struct ChatInputView: View {
                             }
                     }
                     ChatBubble(message: reply)
+                        
                         .rotationEffect(.init(radians: .pi))
                 }
                 .padding(.horizontal)
-                    
             }
             HStack(spacing: 10) {
                 if !audioRecorder.samples.isEmpty {
@@ -722,19 +765,19 @@ struct ChatInputView: View {
                                             Color.clear
                                                 .contentShape(Rectangle())
                                                 .onAppear {
-//                                                    SwiftUI.Task {
-//                                                        let waveformImageDrawer = WaveformImageDrawer()
-////                                                        
-//                                                        let image = try await waveformImageDrawer.waveformImage(fromAudioAt: audioURL, with: liveConfigurationPlayback)
-////                                                        // need to jump back to main queue
-                                                        DispatchQueue.main.async {
-                                                            audioPlayerManager.initializePlayer(audioURL)
-                                                            let media = prema.Media(id: "audio-note", audioURLString: audioURL.absoluteString)
-                                                            viewModel.media = [media]
-                                                        }
-//                                                    }
+                                                    //                                                    SwiftUI.Task {
+                                                    //                                                        let waveformImageDrawer = WaveformImageDrawer()
+                                                    ////
+                                                    //                                                        let image = try await waveformImageDrawer.waveformImage(fromAudioAt: audioURL, with: liveConfigurationPlayback)
+                                                    ////                                                        // need to jump back to main queue
+                                                    DispatchQueue.main.async {
+                                                        audioPlayerManager.initializePlayer(audioURL)
+                                                        let media = prema.Media(id: "audio-note", audioURLString: audioURL.absoluteString)
+                                                        viewModel.media = [media]
+                                                    }
+                                                    //                                                    }
                                                 }
-                                                    
+                                            
                                         }
                                     }
                                 WaveformView(audioURL: audioURL, configuration: liveConfigurationPlayback, priority: .high)
@@ -849,13 +892,15 @@ struct ChatInputView: View {
                 }
             }
             .verticalPadding(5)
-            .background(.regularMaterial)
+//            .background(.regularMaterial)
             .clipShape(.rect(cornerRadius: 20, style: .continuous))
-//            .background {
-//                TransparentBlurView(removeAllFilters: true)
-//                    .blur(radius: 3, opaque: false)
-//                    .padding([.horizontal, .top], -6)
-//            }
+                        .background {
+                            TransparentBlurView(removeAllFilters: true)
+                                .blur(radius: 6, opaque: false)
+                                .padding([.horizontal, .top], -12)
+                        }
+            .clipShape(.rect(cornerRadius: 20, style: .continuous))
+
             .onChange(of: audioRecorder.isRecording) { _,newValue in
                 if newValue {
                     liveConfiguration = Waveform.Configuration(
@@ -875,11 +920,11 @@ struct ChatInputView: View {
             }
             .onChange(of: viewModel.reply) { _,newValue in
                 
-                    self.isFocused = newValue != nil
+                self.isFocused = newValue != nil
                 
             }
             
-      
+        }
         .horizontalPadding()
         .bottomPadding(safeAreaInsets.bottom)
         .keyboardAware()
@@ -890,6 +935,7 @@ struct ChatInputView: View {
                 .presentationCornerRadius(25)
                 .presentationBackground(.thinMaterial)
         }
+            
     }
    
     
@@ -920,7 +966,7 @@ struct ChatInputView: View {
                 }
                 .showMediaPicker(isPresented: $showMediaPicker, type: .direct) { media in
                     viewModel.media = media
-                    viewModel.sendMessage(inbox: inbox)
+                    viewModel.sendMessage()
                 }
             //                .background(Blur())
             //                .cornerRadius(10)
@@ -938,7 +984,7 @@ struct ChatInputView: View {
     }
     
     var buttonColors: [Color] {
-        return viewModel.currentChatMode == .regular ? [.teal, .blue]:viewModel.currentChatMode == .sensitive ? [.indigo, .purple]:[.red, .red]
+        return viewModel.currentChatMode == .regular ? AppearanceManager.shared.currentTheme.vibrantColors:viewModel.currentChatMode == .sensitive ? [.black]:[.red, .red]
     }
     
     var ChatSendButton: some View {
@@ -949,7 +995,7 @@ struct ChatInputView: View {
         .padding(.horizontal, 7)
         .padding(8)
         .foregroundColor(.white)
-        .background(Color.vibrant)
+        .background(.linearGradient(colors: buttonColors, startPoint: .topLeading, endPoint: .bottom))
         .clipShape(.capsule)
         .shadow(color: Color("Shadoww"), radius: 10, x: 2, y: 2)
         .scaleEffect(shouldScale ? 0.8:1)
@@ -964,18 +1010,19 @@ struct ChatInputView: View {
                     audioRecorder.isRecording = true
                 }
             } else {
-                viewModel.sendMessage(inbox: inbox)
+                viewModel.sendMessage()
                 audioRecorder.removeRecording()
             }
         }
     }
     
 }
-/*
+
 struct CreateStickerView: View {
-//    @StateObject var viewModel = CreateStickerViewModel()
+    @StateObject var viewModel = CreateStickerViewModel()
     @Environment (\.dismiss) var dismiss
-    
+    @Environment (\.colorScheme) var colorScheme
+
     var inboxID: String
     var body: some View {
         GeometryReader {
@@ -987,20 +1034,21 @@ struct CreateStickerView: View {
                 }
                 Spacer()
                 Text("Create Sticker")
-                    .largeTitle()
+                    .font(.largeTitle.bold())
+                    .roundedFont()
             }
             Spacer()
             
-//            TextField("Name you ssticker", text: $viewModel.text)
-//                .font(.system(.title2, design: .rounded, weight: .medium))
-            
+            TextField("Name you ssticker", text: $viewModel.text)
+                .font(.system(.title2, design: .rounded, weight: .medium))
+//            
             Spacer()
             ZStack {
-//                if let image = viewModel.fetchedImage {
-//                    Image(uiImage: image)
-//                        .resizable()
-//                        .scaledToFill()
-//                } else {
+                if let image = viewModel.fetchedImage {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                } else {
                     Color.clear.background(.regularMaterial)
                     VStack {
                         Image(systemName: "photo.fill")
@@ -1010,11 +1058,11 @@ struct CreateStickerView: View {
                             .opacity(0.2)
                             .frame(width: size.width * 0.7, height: size.width * 0.7)
                     }
-//                }
+                }
             }
             .frame(width: size.width - 40, height: size.width - 40)
             .cornerRadius(20)
-            .shadow(color: .shadow, radius: 10, x: 0, y: 0)
+//            .shadow(color: .shadow, radius: 10, x: 0, y: 0)
             .onTapGesture {
                 viewModel.showPicker.toggle()
             }
@@ -1053,7 +1101,6 @@ struct CreateStickerView: View {
         }
     }
 }
-*/
 
 class AudioPlayeViewModel: ObservableObject {
   let player: AVPlayer
@@ -1240,14 +1287,16 @@ struct SliderX: View {
 
 
 struct ChatTextField: View {
-    var inbox: Inbox
+    
     @StateObject var directManager: DirectManager = .shared
     @Environment (\.safeAreaInsets) var safeAreaInsets
     @EnvironmentObject var viewModel: ChatManager
     @EnvironmentObject var appearance: AppearanceManager
     
-    @EnvironmentObject var statusViewModel: ActivityStatusViewModel
-    
+    @EnvironmentObject var statusViewModel: ActivityStatusManager
+    var inbox: Inbox {
+        return viewModel.inbox
+    }
     @State var expand = false
     var body: some View {
         HStack {
@@ -1275,7 +1324,7 @@ struct ChatTextField: View {
                         .font(.subheadline.italic())
                         .bold()
                         .roundedFont()
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(statusViewModel.statusColor)
                 }
                 ProfileImageView(avatarImageURL: inbox.avatar)
                     .frame(width: 40, height: 40)
@@ -1310,6 +1359,9 @@ struct ChatTextField: View {
         }
         .topPadding(safeAreaInsets.top)
         .horizontalPadding()
+        .onAppear {
+            self.statusViewModel.getStatus(inbox: inbox)
+        }
     }
 }
 
@@ -1320,3 +1372,65 @@ extension Double {
         return Date(timeIntervalSince1970: self)
     }
 }
+
+extension View {
+    func onScalingLongPress(perform action: @escaping () -> Void) -> some View {
+        modifier(ScalingLongPressModifier(action: action))
+    }
+}
+
+struct ScalingLongPressModifier: ViewModifier {
+    @State private var longPressTask: SwiftUI.Task<Void, Never>?
+    @State private var shouldScale: Bool = false
+    var scaleWhenPressed: Double = 0.975
+    var action: () -> Void
+    
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(shouldScale ? scaleWhenPressed : 1.0)
+            .onLongPressGesture(
+                minimumDuration: 0.2,
+                maximumDistance: 10,
+                perform: {
+                    // do nothing
+                },
+                onPressingChanged: { isPressing in
+                    handlePressingChange(isPressing: isPressing)
+                })
+    }
+    
+    @MainActor
+    private func handlePressingChange(isPressing: Bool) {
+        if isPressing {
+            longPressTask = SwiftUI.Task {
+                // Wait and scale the view
+                try? await SwiftUI.Task.sleep(nanoseconds: 200_000_000)
+                
+                guard !SwiftUI.Task.isCancelled else {
+                    return
+                }
+                
+                withAnimation(.spring()) {
+                    shouldScale = true
+                }
+                
+                // Wait and trigger the action
+                try? await SwiftUI.Task.sleep(nanoseconds: 200_000_000)
+                
+                guard !SwiftUI.Task.isCancelled else {
+                    return
+                }
+                
+                action()
+            }
+        } else {
+            longPressTask?.cancel()
+            longPressTask = nil
+            
+            withAnimation(.spring()) {
+                shouldScale = false
+            }
+        }
+    }
+}
+

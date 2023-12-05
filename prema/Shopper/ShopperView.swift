@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ShopperView: View {
-    @StateObject var navigation = NavigationManager.shared
+    @EnvironmentObject var navigation: NavigationManager
     @StateObject var shopper = ShopperManager.shared
     @Environment (\.colorScheme) var colorScheme
     @Environment (\.safeAreaInsets) var safeAreaInsets

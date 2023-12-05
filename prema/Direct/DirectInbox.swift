@@ -7,148 +7,224 @@
 
 import FirebaseAuth
 import SwiftUI
+import FirebaseDatabase
+
+struct SelectedInbox: Identifiable {
+    var id: String {
+        return inbox.id
+    }
+    var inbox: Inbox
+    var frame: CGRect
+}
 
 struct DirectInbox: View {
     
-    @Environment (\.safeAreaInsets) var safeAreaInsets
-    @Environment (\.colorScheme) var colorScheme
-    @EnvironmentObject var appearance: AppearanceManager
+    var GodIsGood = true
+    
+    @State var selection: Inbox?
+    @State var selectedChat: SelectedInbox?
+    
+    //    @Namespace var global_namespace
+    
     @StateObject var directManager: DirectManager = .shared
-    @StateObject var accountManager: AccountManager = .shared
-    @StateObject var authManager: AuthManager = .shared
-    @EnvironmentObject var navigation: NavigationManager
-    
-    @Namespace var namespace
-    
+    @StateObject var navigation: NavigationManager = .shared
+    @Environment (\.safeAreaInsets) var safeAreaInsets
+    @StateObject var namespace = NamespaceWrapper.shared
     var body: some View {
-        GeometryReader { geometry in
-            if let _ = accountManager.currentProfile {
-                ZStack {
+        ScrollView(showsIndicators: false) {
+      
+            VStack(spacing: 5) {
+                
+                CustomSelectorView(selection: $directManager.selectedDirectMode, strings: [
+                    "all",
+                    "groups",
+                    "communications",
+                    "proxy",
+                    "requests"
+                ])
+                
+                ForEach(directManager.inboxes) { inbox in
                     
-                    ScrollView {
-                        
-                        VStack {
-                            ScrollView(.horizontal) {
-                                HStack {
-                                    CustomSelectorView(selection: $directManager.selectedDirectMode, strings: [
-                                        "all",
-                                        "groups",
-                                        "communities",
-                                        "proxy",
-                                        "requests",
-                                    ])
-                                    Spacer()
-                                }
-                            }
-                            .scrollIndicators(.hidden)
-                            Spacer()
-                            ForEach(directManager.inboxes) { inbox in
-             
-                                    HStack {
-                                        ProfileImageView(avatarImageURL: inbox.avatar)
-                                            .frame(width: 40, height: 40)
-                                        VStack(alignment: .leading) {
-                                            Text(inbox.name)
-                                                .bold()
-                                                .roundedFont()
-                                            if let message = inbox.recentMessage {
-                                                Text(message.preview)
-                                                    .font(.subheadline)
-                                                    .lineLimit(1)
-                                                    .multilineTextAlignment(.leading)
-                                            }
-                                        }
-                                        Spacer()
-                                        VStack {
-                                            if let message = inbox.recentMessage {
-                                                Text(message.timestamp.time.chatTime)
-                                                    .font(.caption)
-                                            }
-                                            if inbox.isUnread {
-                                                Text("\(inbox.unreadCount)")
-                                                    .font(.subheadline.bold())
-                                                    .roundedFont()
-                                                    .buttonPadding(5)
-                                                    .vibrantBackground(cornerRadius: 10, colorScheme: colorScheme)
-                                            }
-                                            Spacer()
-                                        }
-                                    }
-                                    .verticalPadding(10)
-                                    .horizontalPadding()
-                                    .background(Color.secondary.opacity(0.1))
-                                    .clipShape(.rect(cornerRadius: 18, style: .continuous))
-                                    .horizontalPadding()
-                                    .contentShape(.rect)
-//                                    .matchedGeometryEffect(id: "chatProfile-\(inbox.id)", in: NamespaceWrapper.shared.namespace!)
-                                    .onTapGesture {
-                                        withAnimation(.spring()) {
-                                            navigation.path.append(inbox)
-                                        }
-                                    }
-                                
-                            }
-                        }
-                        .topPadding(CGFloat(geometry.size.width) * CGFloat(0.6) * CGFloat(247) / CGFloat(277) - CGFloat(safeAreaInsets.bottom))
-                        .horizontalPadding()
-                        
-                    }
-                 
-                    VStack {
-                        HStack {
-                            Spacer()
-                            if let currentAccount = accountManager.currentAccount {
-                                Menu {
-                                    ForEach(currentAccount.profiles) { profile in
-                                        Button(profile.username) {
-                                            do {
-                                                try Auth.auth().signOut()
-                                                if let password = currentAccount.password {
-                                                    authManager.login(email: currentAccount.email, password: password) {
-                                                        withAnimation(.spring()) {
-                                                            AccountManager.shared.currentProfile = profile
-                                                        }
-                                                        DirectManager.shared = .init()
-                                                        appearance.stopLoading()
-                                                    }
-                                                }
-                                            } catch {}
-                                        }
-                                    }
-                                } label: {
-                                    Text("@" + (accountManager.currentProfile?.username ?? ""))
-                                        .bold()
-                                        .foregroundStyle(Color.vibrant)
-                                        .buttonPadding(20)
-                                        .nonVibrantBackground(cornerRadius: 20, colorScheme: colorScheme)
-                                    
-                                }
-                            }
-                        }
-                        .topPadding(safeAreaInsets.top)
-                        .padding()
-                        Spacer()
-                        
+                    InboxCell(inbox: inbox, selection: $selection)
+                }
+                
+                
+            }
+//            .background(Color(.systemBackground))
+//            .shadow(color: .shadow, radius: 10, x: 0, y: -10)
+            .padding(.bottom, 50)
+            .padding(.top, Double.blobHeight - safeAreaInsets.top)
+        }
+        .ignoresSafeArea()
+        .simultaneousGesture(
+            TapGesture()
+                .onEnded { _ in
+                    withAnimation(.spring(response: 0.4)) {
+                        selection = nil
                     }
                 }
-                .ignoresSafeArea()
-                .sheet(isPresented: $navigation.showNewInbox) {
-                    
-                    ProfileSearchView() { profiles in
-                        navigation.path.append(profiles.inbox)
-                        
-                    }
-                    
-                }
-                .overlay {
-                    
-                }
+        )
+        .sheet(isPresented: $navigation.showNewInbox) {
+            
+            ProfileSearchView() { profiles in
+                navigation.path.append(profiles.inbox)
             }
         }
     }
 }
 
-
+struct InboxCell: View {
+    
+    @StateObject var navigation = NavigationManager.shared
+    @Namespace var namespace
+    @ObservedObject var inbox: Inbox
+    @Binding var selection: Inbox?
+    @StateObject var viewModel = ActivityStatusManager.shared
+    var inboxChangedOnlineHandle: DatabaseHandle!
+    var inboxChangedProfileHandle: DatabaseHandle!
+    var inboxChangedMessageHandle: DatabaseHandle!
+    
+    var body: some View {
+        VStack {
+            HStack {
+                ZStack(alignment: .topLeading) {
+                    ZStack {
+                        ProfileImageView(avatarImageURL: inbox.avatar)
+                    }
+                    .frame(width: 50, height: 50)
+                    .cornerRadius(22)
+                    
+                    Circle()
+                        .foregroundStyle(viewModel.statusColor)
+                        .overlay {
+                            ZStack {
+                                if inbox.isGroup {
+                                    Text("\(viewModel.inChatCount > 0 ? viewModel.inChatCount:  viewModel.onlineCount > 0 ? viewModel.onlineCount:inbox.members.count)")
+                                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                    
+                                }
+                            }
+                        }
+                        .frame(width: !inbox.isGroup ? 10:16, height: !inbox.isGroup ? 10:16)
+                        .padding(3)
+                        .background(Circle().foregroundColor(.background))
+                        .offset(x: -3, y: -3)
+                }
+                
+                VStack(alignment: .leading, spacing: 5) {
+                    HStack {
+                        Text(inbox.name)
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        Image(systemName: "star.fill")
+                            .foregroundColor(Color.orange)
+                        Image(systemName: "bell.slash.fill")
+                            .foregroundColor(Color.gray)
+                    }
+                    if let message = inbox.recentMessage, message.timestamp.time < 60, viewModel.typingCount > 0 {
+                        Text(message.text ?? "")
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    } else {
+                        Text(viewModel.statusText)
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                            .foregroundStyle(viewModel.statusColor)
+                            .lineLimit(1)
+                    }
+                }
+                Spacer()
+                VStack(alignment: .trailing) {
+                    Text("\(inbox.recentMessage?.timestamp.time.chatTime ?? "")")
+                        .font(.caption)
+                        .roundedFont()
+                    if inbox.unreadCount > 0 {
+                        Text("\(inbox.unreadCount)")
+                            .font(.caption.bold())
+                            .roundedFont()
+                            .foregroundColor(.white)
+                            .padding(5)
+                            .padding(.horizontal, 4)
+                            .background(Color.vibrant)
+                            .clipShape(Capsule())
+                    }
+                }
+            }
+            if let selection, selection.id == inbox.id {
+                Divider()
+                    .padding(10)
+                HStack {
+                    Spacer()
+                    Image(systemName: "trash.fill")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(.red)
+                        .padding(7)
+                        .padding(.horizontal, 10)
+                        .background(Color(.systemBackground))
+                        .cornerRadius(12)
+                    //                        .shadow(color: .shadow, radius: 10, x: 0, y: 0  )
+                    Spacer()
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(.purple)
+                        .padding(7)
+                        .padding(.horizontal, 10)
+                        .background(Color(.systemBackground))
+                    
+                        .cornerRadius(12)
+                    //                        .shadow(color: .shadow, radius: 10, x: 0, y: 0  )
+                    Spacer()
+                    Image(systemName: "trash.fill")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(.orange)
+                        .padding(7)
+                        .padding(.horizontal, 10)
+                        .background(Color(.systemBackground))
+                    
+                        .cornerRadius(12)
+                    //                        .shadow(color: .shadow, radius: 10, x: 0, y: 0  )
+                    Spacer()
+                    Image(systemName: "bell.slash.fill")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(.gray)
+                        .padding(7)
+                        .padding(.horizontal, 10)
+                        .background(Color(.systemBackground))
+                    
+                        .cornerRadius(12)
+                    //                        .shadow(color: .shadow, radius: 10, x: 0, y: 0  )
+                    Spacer()
+                }
+            }
+        }
+        .padding(10)
+        .background(Color.secondary.opacity(0.1))
+        .matchedGeometryEffect(id: "blur", in: namespace)
+        .cornerRadius(30)
+        .padding(.horizontal)
+        .onChange(of: viewModel.status) { newValue in
+            inbox.status = viewModel.status
+        }
+        .onAppear {
+            self.viewModel.getStatus(inbox: inbox)
+        }
+        .onTapGesture {
+            if selection == nil {
+                withAnimation(.spring(response: 0.4)) {
+                    navigation.path.append(inbox)
+                }
+            }
+        }
+        .onScalingLongPress {
+            self.haptic()
+            withAnimation(.spring(response: 0.4)) {
+                selection = inbox
+            }
+            
+        }
+     
+    }
+}
 
 struct ProfileSearchView: View {
     
@@ -158,13 +234,13 @@ struct ProfileSearchView: View {
     var preloadTitle: String?
     var preload: [Profile]?
     
- 
+    
     
     @State var profiles: [Profile] = []
     @State var selectedProfiles: [Profile] = []
-
+    
     @StateObject var directManager = DirectManager.shared
-
+    
     @State var text = ""
     var action: ([Profile]) -> ()
     
@@ -218,7 +294,7 @@ struct ProfileSearchView: View {
                                             .font(.subheadline.bold())
                                             .foregroundStyle(selectedProfiles.contains(profile) ? .secondary:appearance.currentTheme.vibrantColors[0])
                                     }
-                                  
+                                    
                                 }
                                 Divider()
                             }
@@ -255,7 +331,7 @@ struct ProfileSearchView: View {
                                     .font(.subheadline.bold())
                                     .foregroundStyle(selectedProfiles.contains(profile) ? .secondary:appearance.currentTheme.vibrantColors[0])
                             }
-                          
+                            
                         }
                         Divider()
                     }

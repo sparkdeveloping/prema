@@ -179,7 +179,7 @@ extension [String: Any] {
 }
 
 class Message: ObservableObject, Identifiable, Equatable, Codable {
-    init(id: String, inboxID: String, type: MessageType, media: [Media]? = nil, sticker: Media?, text: String? = nil, timestamp: Timestamp, destruction: Double? = nil, expiry: Double? = nil, isSent: Bool = true, opened: [Timestamp]) {
+    init(id: String, inboxID: String, type: MessageType, media: [Media]? = nil, sticker: Sticker?, text: String? = nil, timestamp: Timestamp, destruction: Double? = nil, expiry: Double? = nil, isSent: Bool = false, opened: [Timestamp]) {
         self.id = id
         self.inboxID = inboxID
         self.type = type
@@ -218,7 +218,7 @@ class Message: ObservableObject, Identifiable, Equatable, Codable {
         inboxID = try container.decode(String.self, forKey: .inboxID)
         type = try container.decode(MessageType.self, forKey: .type)
         media = try container.decodeIfPresent([Media].self, forKey: .media)
-        sticker = try container.decodeIfPresent(Media.self, forKey: .sticker)
+        sticker = try container.decodeIfPresent(Sticker.self, forKey: .sticker)
         text = try container.decodeIfPresent(String.self, forKey: .text)
         timestamp = try container.decode(Timestamp.self, forKey: .timestamp)
         destruction = try container.decodeIfPresent(Double.self, forKey: .destruction)
@@ -265,14 +265,14 @@ class Message: ObservableObject, Identifiable, Equatable, Codable {
     @Published var frame: CGRect = .zero
     var type: MessageType
     var media: [Media]?
-    var sticker: Media?
+    var sticker: Sticker?
     var text: String?
     var timestamp: Timestamp
     
     var destruction: Double? = nil
     var expiry: Double? = nil
     
-    @Published var isSent: Bool = true
+    @Published var isSent: Bool = false
     
     @Published var isMessageSendError: Bool = false
     
@@ -304,7 +304,7 @@ extension [String : Any] {
             _id = id
         }
         let text = self["text"] as? String
-        let sticker = (self["sticker"] as? [String: Any])?.parseMedia()
+        let sticker = (self["sticker"] as? [String: Any])?.parseSticker()
         let mediaDict = self["media"] as? [[String: Any]] ?? []
         let media = mediaDict.map { $0.parseMedia() }
         let inboxID = self["inboxID"] as? String ?? UUID().uuidString
@@ -320,7 +320,7 @@ extension [String : Any] {
         let openedDict = self["opened"] as? [[String: Any]] ?? []
         let opened = openedDict.map { $0.parseTimestamp() }
         
-        return .init(id: _id, inboxID: inboxID, type: type, media: media, sticker: sticker, text: text, timestamp: timestamp, destruction: destruction, expiry: expiry, opened: opened)
+        return .init(id: _id, inboxID: inboxID, type: type, media: media, sticker: sticker, text: text, timestamp: timestamp, destruction: destruction, expiry: expiry, isSent: true, opened: opened)
     }
 }
 
@@ -350,10 +350,10 @@ extension Message {
 //        dict["timestamp"] = self.timestamp.dictionary
         dict["timestamp"] = timestamp.dictionary
         if let destruction {
-            dict["destruction"] = self.destruction
+            dict["destruction"] = destruction
         }
         if let expiry {
-            dict["expiry"] = self.expiry
+            dict["expiry"] = expiry
         }
         dict["timestamp"] = timestamp.dictionary
         if let sticker {

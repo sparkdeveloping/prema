@@ -10,6 +10,7 @@ import ExyteMediaPicker
 import Foundation
 import CoreMedia
 import AVFoundation
+import Photos
 
 enum MediaType {
     case image, video, audio
@@ -128,5 +129,44 @@ extension AVAsset {
             print(error)
         }
         return nil
+    }
+}
+
+extension Media {
+    func downloadToPhotoLibrary() {
+        DispatchQueue.global(qos: .background).async {
+            if let url = self.videoURLString?.url,
+               let urlData = NSData(contentsOf: url)
+            {
+                let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0];
+                let filePath="\(documentsPath)/tempFile.mp4"
+                DispatchQueue.main.async {
+                    urlData.write(toFile: filePath, atomically: true)
+                    PHPhotoLibrary.shared().performChanges({
+                        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: URL(fileURLWithPath: filePath))
+                    }) { completed, error in
+                        if completed {
+                            print("Video is saved!")
+                        }
+                    }
+                }
+            } else if let url = self.imageURLString?.url {
+                getData(from: url) { data, response, error in
+                    guard let data = data, error == nil else { return }
+                    print(response?.suggestedFilename ?? url.lastPathComponent)
+                    print("Download Finished")
+                    // always update the UI from the main thread
+                    DispatchQueue.main.async() { 
+                        guard let image = UIImage(data: data) else { return }
+                        UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+                    }
+                }
+            }
+        }
+        
+        func getData(from url: URL, completion: @escaping (Data?, URLResponse?, Error?) -> ()) {
+            URLSession.shared.dataTask(with: url, completionHandler: completion).resume()
+        }
+        
     }
 }

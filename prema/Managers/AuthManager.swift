@@ -105,7 +105,17 @@ class AuthManager: ObservableObject {
                     self.error = error.localizedDescription
                 }
                 if avatars.isEmpty {
-                    AppearanceManager.shared.stopLoading()
+                    AccountManager.shared.fetchProfiles(id: accountID) { profiles in
+                        if let index = AccountManager.shared.accounts.firstIndex(where: {$0.id == accountID }) {
+                            AccountManager.shared.accounts[index].profiles = profiles
+                            if !profiles.isEmpty {
+                                withAnimation(.spring()) {
+                                    AccountManager.shared.currentProfile = profiles.first(where: { $0.id == id }) ?? profiles[0]
+                                }
+                            }
+                            AccountManager.shared.saveAccountsLocally()
+                        }
+                    }
                 } else {
                     StorageManager.uploadMedia(media: avatars, locationName: "avatars") { mediaDict in
                         
@@ -117,7 +127,7 @@ class AuthManager: ObservableObject {
                                 AccountManager.shared.accounts[index].profiles = profiles
                                 if !profiles.isEmpty {
                                     withAnimation(.spring()) {
-                                        AccountManager.shared.currentProfile = profiles[0]
+                                        AccountManager.shared.currentProfile = profiles.first(where: { $0.id == id }) ?? profiles[0]
                                     }
                                 }
                                 AccountManager.shared.saveAccountsLocally()

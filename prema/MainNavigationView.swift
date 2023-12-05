@@ -40,6 +40,7 @@ struct MainNavigationView: View {
                         DirectView()
                             .tag(Tab.direct)
                         ShopperView()
+                            .environmentObject(navigation)
                             .tag(Tab.shopper)
                         Color.clear
                             .tag(Tab.bite)

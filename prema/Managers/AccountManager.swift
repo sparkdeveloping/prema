@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Firebase
+import FirebaseDatabase
 
 class AccountManager: ObservableObject {
     
@@ -137,6 +138,54 @@ class AccountManager: ObservableObject {
             }
         }
     }
+    
+    func isOnline(bool: Bool, inboxes: [Inbox] = [], tab: String = "Home") {
+        if let currentProfile {
+            if !currentProfile.id.isEmpty {
+                let ref = Ref().databaseIsOnline(uid: currentProfile.id)
+                let dict: Dictionary<String, Any> = [
+                    "online": bool as Any,
+                    "latest": Date().timeIntervalSince1970 as Any,
+                    "tab": tab as Any
+                ]
+                ref.updateChildValues(dict)
+            }
+        }
+    }
+    
+    func updateInboxStatus(to: [Inbox], online: Bool? = nil, typing: Bool? = nil, inChat: Bool? = nil, tab: String? = nil) {
+        if let currentProfile {
+            to.forEach { to in
+                print("our inbox id is: \(to.id)")
+                let ref = Database.database().reference().child("direct").child("inbox").child(to.id).child("status")
+                var dict: Dictionary<String, Any> = [:]
+                
+                if let online {
+                    ref.child("online").child(currentProfile.id).setValue(online)
+                }
+                if let typing {
+//                    dict["typing"] = [currentProfile.id:typing]
+                    ref.child("typing").child(currentProfile.id).setValue(typing)
+
+                }
+                if let inChat {
+//                    dict["inChat"] = [currentProfile.id:inChat]
+                    ref.child("inChat").child(currentProfile.id).setValue(inChat)
+
+                }
+                if let tab {
+                    ref.child("tab").child(currentProfile.id).setValue(tab)
+//                    dict["tab"] = [currentProfile.id:tab]
+                }
+                print("our inbox id is: \(to.id) -- dict: \(dict)")
+                
+//                if !(online == nil && typing == nil && inChat == nil && tab == nil) {
+//                    ref.setValue(dict)
+//                }
+            }
+        }
+    }
+    
 }
 
 extension Array where Element: Hashable {

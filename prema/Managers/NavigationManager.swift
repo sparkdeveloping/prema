@@ -17,7 +17,7 @@ class NavigationManager: ObservableObject {
     @Published var selectedRideTab: String = "Home"
     @Published var path = NavigationPath()
     @Published var showSidebar = true
-
+    @Published var media: [Media]?
     var selfTabs = ["FullName", "Heart", "Bell", "Settings"]
     var directTabs = ["DirectInbox", "DirectFeed", "DirectAlerts", "DirectSettings"]
     var shopperTabs = ["ShopperHome", "ShopperCart", "ShopperOrders", "ShopperSettings"]

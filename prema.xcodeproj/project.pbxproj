@@ -54,6 +54,7 @@
 		DB1A43EF2B0D30F700826D6B /* ShopperView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB1A43EE2B0D30F700826D6B /* ShopperView.swift */; };
 		DB1A43F12B0D32C000826D6B /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB1A43F02B0D32C000826D6B /* Product.swift */; };
 		DB1A43F32B0D37AB00826D6B /* ShopperManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB1A43F22B0D37AB00826D6B /* ShopperManager.swift */; };
+		DB2B74862B1D3EED009F0977 /* MediaPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB2B74852B1D3EED009F0977 /* MediaPlayerView.swift */; };
 		DB49E60D2AF8888B007789DC /* NavigationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB49E60C2AF8888B007789DC /* NavigationManager.swift */; };
 		DB49E6102AF88996007789DC /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB49E60F2AF88996007789DC /* ProfileView.swift */; };
 		DB49E6122AF889B1007789DC /* VisionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB49E6112AF889B1007789DC /* VisionsView.swift */; };
@@ -70,6 +71,7 @@
 		DB6DC9932AC8312400F381CF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DB6DC9752AC8311F00F381CF /* Assets.xcassets */; };
 		DB6DC9962AC8312400F381CF /* premaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC97A2AC8312100F381CF /* premaApp.swift */; };
 		DB6DC9982AC8312400F381CF /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DB6DC97E2AC8312200F381CF /* Preview Assets.xcassets */; };
+		DB9623AB2B1CE52D00DC7D8F /* TransparentBlurView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB9623AA2B1CE52D00DC7D8F /* TransparentBlurView.swift */; };
 		DB986F442AF699A60038F123 /* ExyteMediaPicker in Frameworks */ = {isa = PBXBuildFile; productRef = DB986F432AF699A60038F123 /* ExyteMediaPicker */; };
 		DB986F472AF6A9CC0038F123 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = DB986F462AF6A9CC0038F123 /* SDWebImageSwiftUI */; };
 		DBA2C5982B0F92C500893CF1 /* YPImagePicker in Frameworks */ = {isa = PBXBuildFile; productRef = DBA2C5972B0F92C500893CF1 /* YPImagePicker */; };
@@ -168,6 +170,7 @@
 		DB1A43EE2B0D30F700826D6B /* ShopperView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopperView.swift; sourceTree = "<group>"; };
 		DB1A43F02B0D32C000826D6B /* Product.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Product.swift; sourceTree = "<group>"; };
 		DB1A43F22B0D37AB00826D6B /* ShopperManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopperManager.swift; sourceTree = "<group>"; };
+		DB2B74852B1D3EED009F0977 /* MediaPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPlayerView.swift; sourceTree = "<group>"; };
 		DB2F8A1F2AB687F100713B5B /* prema.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = prema.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB49E60C2AF8888B007789DC /* NavigationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationManager.swift; sourceTree = "<group>"; };
 		DB49E60F2AF88996007789DC /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
@@ -186,6 +189,7 @@
 		DB6DC9752AC8311F00F381CF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DB6DC97A2AC8312100F381CF /* premaApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = premaApp.swift; sourceTree = "<group>"; };
 		DB6DC97E2AC8312200F381CF /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		DB9623AA2B1CE52D00DC7D8F /* TransparentBlurView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransparentBlurView.swift; sourceTree = "<group>"; };
 		DBA2C5D92B0F9CB600893CF1 /* MediaPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaPicker.swift; sourceTree = "<group>"; };
 		DBA2C5DC2B0FA98500893CF1 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		DBA537562B18846D00029606 /* premaNotification.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = premaNotification.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -407,8 +411,10 @@
 			children = (
 				DBB051492B043C0D0008A002 /* prema.entitlements */,
 				DBD9A5E92B15129100ADB7DA /* RefreshableScrollView.swift */,
+				DB9623AA2B1CE52D00DC7D8F /* TransparentBlurView.swift */,
 				DBAEE9422B0A84FC00AF1BE2 /* Ref.swift */,
 				DB6DC97A2AC8312100F381CF /* premaApp.swift */,
+				DB2B74852B1D3EED009F0977 /* MediaPlayerView.swift */,
 				DB0081102AF443C300C085C8 /* Info.plist */,
 				DBAEE9482B0A92F500AF1BE2 /* ViewExtensions.swift */,
 				DBA2C5DB2B0FA97800893CF1 /* Camera */,
@@ -693,6 +699,7 @@
 				DBE49AE32B0ECC9E005FBFD1 /* NextLevel+UIImage.swift in Sources */,
 				DB0140192AF562380053A376 /* Profile.swift in Sources */,
 				DBE49AAA2B0E0CFA005FBFD1 /* DirectInbox.swift in Sources */,
+				DB2B74862B1D3EED009F0977 /* MediaPlayerView.swift in Sources */,
 				DBB051502B05DADA0008A002 /* ChatView.swift in Sources */,
 				DBE49ADA2B0ECC9E005FBFD1 /* NextLevelGIFCreator.swift in Sources */,
 				DB1A43EF2B0D30F700826D6B /* ShopperView.swift in Sources */,
@@ -739,6 +746,7 @@
 				DB49E6172AF92999007789DC /* SelfManager.swift in Sources */,
 				DBE49AB42B0E215A005FBFD1 /* RideTravel.swift in Sources */,
 				DBE49AE12B0ECC9E005FBFD1 /* NextLevel+AVFoundation.swift in Sources */,
+				DB9623AB2B1CE52D00DC7D8F /* TransparentBlurView.swift in Sources */,
 				DB49E61D2AFAF891007789DC /* Inbox.swift in Sources */,
 				DBE49ADF2B0ECC9E005FBFD1 /* CameraOperationManager.swift in Sources */,
 				DB1A43F32B0D37AB00826D6B /* ShopperManager.swift in Sources */,

@@ -40,6 +40,7 @@ struct VisionsView: View {
                         CustomSelectorView(selection: $currentTab, strings: ["visions", "tasks"])
                         Spacer()
                     }
+                    
                     Text("writing ALL your visions down is proof of expectation")
                         .font(.subheadline)
                         .bold()

@@ -18,18 +18,48 @@ exports.sendDirectNotifications = functions.firestore
     console.log("profile ", data.recentMessage.timestamp.profile);
     console.log("profile 2 ", data.recentMessage.timestamp.profile.fullName);
 
-    var message = "New Message";
+    const message = data.recentMessage;
+    const type = message.type;
+    var messageText = "New Message";
+    console.log(`this is the print 0}`);
 
-    if (data.recentMessage.text) {
-      message = data.recentMessage.text;
+    if (type == "text") {
+      console.log(`this is the print 1: ${message.type}`);
+      if (message.text) {
+        messageText = message.text;
+        console.log(`this is the print 2: ${message}`);
+      }
     }
+    if (type == "image") {
+      messageText = "Image📸";
+    }
+    if (type == "video") {
+      messageText = "Video🎥";
+    }
+    if (type == "sticker") {
+      messageText = "Sticker🌞";
+    }
+
+    if (data.expiry) {
+      messageText = "Sensitive Message🔒";
+    }
+
+    if (data.destruction) {
+      messageText = "Destructive Message💣";
+    }
+
+    messageText =
+      data.members.length > 2
+        ? `@${message.timestamp.profile.username} sent a ${messageText}`
+        : "";
+
     if (data.accepts.length > 0) {
       data.accepts.forEach((recipient) => {
-        if (recipient != data.recentMessage.timestamp.profile.id) {
+        if (recipient != message.timestamp.profile.id) {
           const payload = {
             notification: {
-              title: data.recentMessage.timestamp.profile.fullName,
-              body: message,
+              title: message.timestamp.profile.fullName,
+              body: messageText,
               mutable_content: "true",
             },
             data: {
@@ -37,7 +67,11 @@ exports.sendDirectNotifications = functions.firestore
               inboxID: data.id,
             },
           };
-          console.log("sending to topic", `${recipient}direct`);
+          console.log(
+            "sending to topic",
+            `${recipient}direct the message: ${messageText}`
+          );
+          `${recipient}direct the message: ${messageText} of type: ${type}`;
           admin.messaging().sendToTopic(`${recipient}direct`, payload);
         }
       });
@@ -46,8 +80,11 @@ exports.sendDirectNotifications = functions.firestore
       data.requests.forEach((recipient) => {
         const payload = {
           notification: {
-            title: data.recentMessage.timestamp.profile.fullName,
-            body: "Wants to direct message you",
+            title: message.timestamp.profile.fullName,
+            body:
+              data.members.length > 2
+                ? "Added you to a new group👥"
+                : "Wants to direct message you",
             mutable_content: "true",
           },
           data: {
@@ -55,7 +92,10 @@ exports.sendDirectNotifications = functions.firestore
             inboxID: data.id,
           },
         };
-        console.log("sending request ", `${recipient}direct`);
+        console.log(
+          "sending to topic",
+          `${recipient}direct the message: ${messageText} of type: ${type}`
+        );
         admin.messaging().sendToTopic(`${recipient}direct`, payload);
       });
     }

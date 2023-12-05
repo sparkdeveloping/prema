@@ -16,18 +16,36 @@ class DirectManager: ObservableObject {
     @Published var accepts: [Inbox] = []
     @Published var requests: [Inbox] = []
     var inboxes: [Inbox] {
-        return selectedDirectMode == "all" ? self.accepts:self.requests
+        return selectedDirectMode == "all" ? self.accepts: selectedDirectMode == "groups" ? self.accepts.filter({ $0.isGroup }) :self.requests
     }
     @Published var inbox: Inbox?
     @Published var selectedDirectMode = "all"
-    
+    @Published var stickers: [Sticker] = []
+
     let client = SearchClient(appID: "0D2Q7L4DCF", apiKey: "ec1b50b1def1c426ed5f82614d547ed2")
     
     static var shared = DirectManager()
     
+    func fetchStickers() {
+        Ref.firestoreDb.collection("stickers")
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("error loading stickers: \(error.localizedDescription)")
+                }
+                if let snapshot = snapshot {
+                    snapshot.documents.forEach { document in
+                        let sticker = document.data().parseSticker()
+                        self.stickers.append(sticker)
+                    }
+                }
+            }
+    }
+    
     init() {
-        self.fetchInboxes()
+//        self.fetchInboxes()
+        fetchStickers()
         self.listenForInboxChanges()
+        
     }
     
     func fetchInbox(_ id: String, completion: @escaping(Inbox) -> ()) {
@@ -45,13 +63,13 @@ class DirectManager: ObservableObject {
     
     func fetchInboxes() {
         if let profile = AccountManager.shared.currentProfile {
-            Firestore.firestore().collection("inbox").whereField("accepts", arrayContains: profile.id).order(by: "recentMessage.timestamp.time", descending: true).getDocuments { snapshot, error in
+            Firestore.firestore().collection("inbox").whereField("accepts", arrayContains: profile.id).order(by: "recentmessage.recentMessage.timestamp.time.time", descending: true).getDocuments { snapshot, error in
                 if let error {}
                 if let snapshot {
                     self.accepts = snapshot.documents.map { $0.data().parseInbox($0.documentID) }
                 }
             }
-            Firestore.firestore().collection("inbox").whereField("requests", arrayContains: profile.id).order(by: "recentMessage.timestamp.time", descending: true).getDocuments { snapshot, error in
+            Firestore.firestore().collection("inbox").whereField("requests", arrayContains: profile.id).order(by: "recentmessage.recentMessage.timestamp.time.time", descending: true).getDocuments { snapshot, error in
                 if let error {}
                 if let snapshot {
                     self.requests = snapshot.documents.map { $0.data().parseInbox($0.documentID) }
@@ -61,9 +79,14 @@ class DirectManager: ObservableObject {
     }
     
     func listenForInboxChanges() {
+        print("this is being called for inbox")
         if let profile = AccountManager.shared.currentProfile {
-            Firestore.firestore().collection("inbox").whereField("accepts", arrayContains: profile.id).limit(toLast: 1).addSnapshotListener { snapshot, error in
-                if let error {}
+            Firestore.firestore().collection("inbox").whereField("accepts", arrayContains: profile.id).order(by: "recentMessage.timestamp.time", descending: true).addSnapshotListener { snapshot, error in
+                print("this is being called for inbox 2")
+                if let error {
+                    print("this is being called for inbox 2.5: \(error.localizedDescription)")
+
+                }
                 if let snapshot {
                     let changes = snapshot.documentChanges
                     
@@ -72,13 +95,15 @@ class DirectManager: ObservableObject {
                         case .added:
                             if !self.accepts.contains(where: { $0.id == change.document.documentID }) {
                                 withAnimation(.spring()) {
-                                    self.accepts.insert(change.document.data().parseInbox(change.document.documentID), at: 0)
+                                    self.accepts.append(change.document.data().parseInbox(change.document.documentID))
                                 }
+                                print("this is being called for inbox 3")
                             }
                         case .modified:
                             if let index = self.accepts.firstIndex(where: { $0.id == change.document.documentID } ) {
                                 withAnimation(.spring()) {
-                                    self.accepts[index] = change.document.data().parseInbox(change.document.documentID)
+                                    self.accepts.remove(at: index)
+                                    self.accepts.insert(change.document.data().parseInbox(change.document.documentID), at: 0)
                                 }
                             }
                         case .removed:
@@ -172,12 +197,12 @@ class DirectManager: ObservableObject {
     }
 }
 
-class ActivityStatusViewModel: ObservableObject {
+class ActivityStatusManager: ObservableObject {
     @Published var status: ActivityStatus = .init()
     
     var inbox: Inbox!
     var statusHandle: DatabaseHandle!
-
+    static var shared = ActivityStatusManager()
     var online: [Profile] {
         var onl: [Profile] = []
         self.status.isOnline.forEach({ (key, value) in
@@ -263,32 +288,59 @@ class ActivityStatusViewModel: ObservableObject {
         }
 
         return .linearGradient(colors: [.gray], startPoint: .topLeading, endPoint: .bottomTrailing)
-
     }
     
     func getStatus(inbox: Inbox) {
-        self.inbox = inbox
-        
-        let ref = Database.database().reference().child("direct").child("inbox").child(inbox.id).child("status")
-            
-        print("the online: 1: \(inbox.id)")
-        statusHandle = ref.observe(.value) { snapshot in
-            print("the online: 2: \(snapshot)")
-            if let data = snapshot.value as? [String: Any] {
-                print("the online: 3: \(data)")
-                let status = data.parseStatus()
-                print("the online 4.5: \(status)")
+            self.inbox = inbox
+            let ref = Database.database().reference().child("direct").child("inbox").child(inbox.id).child("status")
+                
+            statusHandle = ref.observe(.value) { snapshot in
+                if let data = snapshot.value as? [String: Any] {
+                    let status = data.parseStatus()
 
-                self.status = status
-//                        self.accepts.remove(at: index)
-//                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-//                            self.accepts.insert(inbox, at: 0)
-//                        }
-//                    self.accepts[index].unread = inbox.unread
-                }
-            
+                    self.status = status
+    //                        self.accepts.remove(at: index)
+    //                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+    //                            self.accepts.insert(inbox, at: 0)
+    //                        }
+    //                    self.accepts[index].unread = inbox.unread
+                    }
+                
+            }
+
         }
-
-    }
     
+}
+
+extension String {
+
+    func formattedName(from names: [String]) -> String {
+        let matchingNames = names.filter { $0.lowercased() == self.lowercased() }
+
+        if matchingNames.count == 1 {
+            let components = self.components(separatedBy: " ")
+            return components.first ?? self
+        } else {
+            var formattedName: String
+
+            let sortedMatchingNames = matchingNames.sorted()
+
+            if let index = sortedMatchingNames.firstIndex(of: self) {
+                let count = index + 1
+                let components = self.components(separatedBy: " ")
+
+                if components.count > 1 {
+                    let firstName = components[0]
+                    let lastNameInitial = components.last?.prefix(1) ?? ""
+                    formattedName = count == 1 ? "\(firstName)" : "\(firstName) \(lastNameInitial) \(count)"
+                } else {
+                    formattedName = self
+                }
+            } else {
+                formattedName = self
+            }
+
+            return formattedName
+        }
+    }
 }

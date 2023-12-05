@@ -20,7 +20,7 @@ struct Settings: Codable, Hashable {
     var allowedNotifications: [String]
 }
 
-struct ActivityStatus: Codable {
+struct ActivityStatus: Codable, Equatable {
     var isOnline: [String:Bool] = [:]
     var latest: Double = Date.now.timeIntervalSince1970
     var typing: [String:Bool] = [:]
@@ -42,7 +42,23 @@ extension [String: Any] {
     }
 }
 
-struct Profile: Identifiable, Codable, Hashable {
+class Profile: Identifiable, Codable, Hashable {
+    init(id: String = UUID().uuidString, fullName: String = "Empty Name", username: String = "premauser", bio: String = "no bio", gender: Gender = .none, birthday: Double = 0, avatars: [Media] = [], avatarImageURL: String? = nil, type: ProfileType = .none, privacy: Privacy = .public, settings: Settings? = defaultSettings, visions: [Vision] = [], status: ActivityStatus? = nil) {
+        self.id = id
+        self.fullName = fullName
+        self.username = username
+        self.bio = bio
+        self.gender = gender
+        self.birthday = birthday
+        self.avatars = avatars
+        self.avatarImageURL = avatarImageURL
+        self.type = type
+        self.privacy = privacy
+        self.settings = settings
+        self.visions = visions
+        self.status = status
+    }
+    
     static func == (lhs: Profile, rhs: Profile) -> Bool {
         lhs.id == rhs.id
     }
@@ -130,7 +146,7 @@ extension [Profile] {
         
         
         print("accepts id: \(concatenatedString)")
-        return Inbox(id: concatenatedString, members: membs, requests: self.map { $0.id }, accepts: [], displayName: membs.map { $0.username }.reduce("") { "\($0), " + $1 }, recentMessage: nil, creationTimestamp: .init(id: UUID().uuidString, profile: AccountManager.shared.currentProfile ?? .init(), time: Date.now.timeIntervalSince1970), unreadDict: [:])
+        return Inbox(id: concatenatedString, members: membs, requests: self.map { $0.id }, accepts: [], displayName: nil, recentMessage: nil, creationTimestamp: .init(id: UUID().uuidString, profile: AccountManager.shared.currentProfile ?? .init(), time: Date.now.timeIntervalSince1970), unreadDict: [:])
     }
 }
 

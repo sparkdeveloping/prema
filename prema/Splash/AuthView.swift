@@ -109,7 +109,7 @@ struct AccountsView: View {
                                 .roundedFont()
                             Spacer()
                             if createProfile {
-                                DismissButton() {
+                                DismissButton(type: .down) {
                                     withAnimation(.spring()) {
                                         createProfile = false
                                     }
@@ -539,20 +539,40 @@ struct CustomPickerView: View {
 
 struct DismissButton: View {
     
-    var action:() -> ()
-    var color: Color = .red
-    @Environment(\.colorScheme) var colorScheme
-
-    var body: some View {
-        Button {
-            action()
-        } label: {
-            Image(systemName: "xmark")
-                .font(.title2.bold())
-                .foregroundStyle(color)
-                .padding(10)
-                .nonVibrantBackground(cornerRadius: 12, colorScheme: colorScheme)
+    enum DismissType {
+        case exit, left, right, up, down
+    }
+    
+    var type: DismissType = .exit
+    
+    var imageName: String {
+        switch type {
+        case .exit:
+            return "xmark"
+        case .left:
+            return "chevron.left"
+        case .right:
+            return "chevron.right"
+        case .up:
+            return "chevron.up"
+        case .down:
+            return "chevron.down"
         }
+    }
+    
+    var action: () -> ()
+    
+    var body: some View {
+        Image(systemName: imageName)
+            .font(.system(size: 18, weight: .bold, design: .rounded))
+            .frame(width: 38, height: 38)
+            .opacity(0.3)
+            .background(.regularMaterial)
+            .cornerRadius(15)
+            .shadow(color: .black.opacity(0.3), radius: 7, x: 1, y: 1)
+            .onTapGesture {
+                action()
+            }
     }
 }
 

@@ -16,15 +16,18 @@ struct MainView: View {
     @StateObject var accountManager = AccountManager.shared
     @Environment(\.safeAreaInsets) var safeAreaInsets
     @Environment(\.colorScheme) var colorScheme
+    @StateObject var namespace: NamespaceWrapper = .shared
+    @Namespace var namespacee
 
     @StateObject var directManager = DirectManager.shared
+    @Environment(\.scenePhase) var scenePhase
 
     @State var appeared = false
     @State var size: CGSize = .zero
     init() {
         
-        UIFont.registerFontWithFilenameString("alba.ttf")
-        NamespaceWrapper.shared.namespace = namespace
+        NamespaceWrapper.shared.namespace = namespacee
+        
         if let profile = accountManager.currentProfile {
             let topic = profile.id + "direct"
             Messaging.messaging().subscribe(toTopic: topic) { error in
@@ -33,7 +36,6 @@ struct MainView: View {
             }
         }
     }
-    @Namespace var namespace
 
 
     var body: some View {
@@ -55,13 +57,18 @@ struct MainView: View {
                             .ignoresSafeArea()
                             .environmentObject(appearance)
                             .navigationDestination(for: Inbox.self) { inbox in
-                                ChatView(inbox: inbox)
+                                ChatView()
+                                    .environmentObject(ChatManager(inbox))
                                     .toolbar(.hidden)
                             }
                             .navigationDestination(for: String.self) { string in
                                 if string == "checkout" {
                                     ShopperCheckoutView()
                                         .toolbar(.hidden)
+                                }
+                                if string.contains("|") {
+                                    let strings = string.components(separatedBy: "|")
+                                    CreateStickerView(inboxID: strings[1])
                                 }
                             }
                             .navigationDestination(for: Vision.self) { vision in
@@ -76,7 +83,24 @@ struct MainView: View {
                                         navigation.path.append(inbox)
                                     }
                                 }
-                              
+                            }
+                            .onChange(of: scenePhase) { _, newPhase in
+                                if newPhase == .active {
+                                    print("Active")
+                                    AccountManager.shared.isOnline(bool: true)
+                                    AccountManager.shared.updateInboxStatus(to: directManager.accepts, online: true)
+                                    
+                                } else if newPhase == .inactive {
+                                    print("Inactive")
+                                    AccountManager.shared.updateInboxStatus(to: directManager.accepts, online: false)
+                                    
+                                    AccountManager.shared.isOnline(bool: false)
+                                } else if newPhase == .background {
+                                    print("Background")
+                                    AccountManager.shared.updateInboxStatus(to: directManager.accepts, online: false)
+                                    
+                                    AccountManager.shared.isOnline(bool: false)
+                                }
                             }
                     }
                     .ignoresSafeArea()
@@ -135,7 +159,15 @@ struct MainView: View {
             .overlay(alignment: .topLeading) {
                 blob
             }
-            .simultaneousGesture(TapGesture().onEnded { _ in hideKeyboard()})
+            .overlay {
+                ZStack {
+                    if let media = navigation.media {
+                        MediaPlayerView(media: media)
+                            .transition(.scale)
+                            .matchedGeometryEffect(id: "mediaplayer-\(media[0].id)", in: namespace.namespace!)
+                    }
+                }
+            }
             .onAppear {
                 self.size = size
                 appearance.size = size
@@ -163,11 +195,12 @@ struct MainView: View {
                                 .foregroundStyle(.white.opacity(0.6))
                         }
                     } else {
-                        Image(systemName: "xmark")
+                        Image(systemName: "chevron.left")
                             .font(.largeTitle.bold())
                             .foregroundStyle(.white)
                             .padding(20)
                             .topPadding(20)
+                            .contentShape(.rect)
                             .onTapGesture {
                                 navigation.path.removeLast()
                             }
