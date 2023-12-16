@@ -11,6 +11,7 @@ import PushKit
 import UserNotifications
 import FirebaseCore
 import FirebaseMessaging
+import TipKit
 @main
 
 struct premaApp: App {
@@ -28,6 +29,7 @@ struct premaApp: App {
                     NavigationManager.shared = navigation
 
                 }
+           
         }
     }
 }
@@ -37,20 +39,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         FirebaseApp.configure()
-        let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            print("Notification permissions granted: \(granted)")
+        NotificationManager.shared.requestAuthorization { granted in
+            UNUserNotificationCenter.current().delegate = self
         }
-        center.requestAuthorization(options:[.badge, .alert, .sound]){ (granted, error) in }
-        
-        center.delegate = self
-                
         Messaging.messaging().delegate = self
         FirebaseConfiguration.shared.setLoggerLevel(.min)
         
         let openAction = UNNotificationAction(identifier: "OpenNotification", title: NSLocalizedString("Abrir", comment: ""), options: UNNotificationActionOptions.foreground)
         let deafultCategory = UNNotificationCategory(identifier: "CustomSamplePush", actions: [openAction], intentIdentifiers: [], options: [])
-        center.setNotificationCategories(Set([deafultCategory]))
+        UNUserNotificationCenter.current().setNotificationCategories(Set([deafultCategory]))
         
         application.registerForRemoteNotifications()
         

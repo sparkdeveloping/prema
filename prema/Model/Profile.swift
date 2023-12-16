@@ -43,7 +43,7 @@ extension [String: Any] {
 }
 
 class Profile: Identifiable, Codable, Hashable {
-    init(id: String = UUID().uuidString, fullName: String = "Empty Name", username: String = "premauser", bio: String = "no bio", gender: Gender = .none, birthday: Double = 0, avatars: [Media] = [], avatarImageURL: String? = nil, type: ProfileType = .none, privacy: Privacy = .public, settings: Settings? = defaultSettings, visions: [Vision] = [], status: ActivityStatus? = nil) {
+     init(id: String = UUID().uuidString, fullName: String = "Empty Name", username: String = "premauser", bio: String = "no bio", gender: Gender = .none, birthday: Double = 0, avatars: [Media] = [], avatarImageURL: String? = nil, type: ProfileType = .none, privacy: Privacy = .public, settings: Settings? = defaultSettings, visions: [Vision] = [], status: ActivityStatus? = nil, performances: [Performance] = defaultPerformances) {
         self.id = id
         self.fullName = fullName
         self.username = username
@@ -57,7 +57,10 @@ class Profile: Identifiable, Codable, Hashable {
         self.settings = settings
         self.visions = visions
         self.status = status
+        self.performances = performances
     }
+    
+    
     
     static func == (lhs: Profile, rhs: Profile) -> Bool {
         lhs.id == rhs.id
@@ -79,9 +82,15 @@ class Profile: Identifiable, Codable, Hashable {
     var settings: Settings? = defaultSettings
     var visions: [Vision] = []
     var status: ActivityStatus? = nil
-    
+    var performances: [Performance] = defaultPerformances
     static var defaultSettings = Settings(allowedNotifications: ["general" ,"direct"])
+    static var defaultPerformances: [Performance] = [
     
+        .init(id: UUID().uuidString, name: "Productivity", progress: [], statements: [], opens: []),
+        .init(id: UUID().uuidString, name: "Discipline", progress: [], statements: [], opens: []),
+        .init(id: UUID().uuidString, name: "Diligence", progress: [], statements: [], opens: []),
+        .init(id: UUID().uuidString, name: "Retros", progress: [], statements: [], opens: [])
+    ]
     
 }
 
@@ -120,7 +129,7 @@ extension [String: Any] {
         }
         let fullName = self["fullName"] as? String ?? "Empty Name"
         let username = self["username"] as? String ?? "premauser"
-        let bio = self["username"] as? String ?? "no bio"
+        let bio = self["bio"] as? String ?? "no bio"
         let gender = Gender(rawValue: self["gender"] as? String ?? "") ?? .none
         let type = ProfileType(rawValue: self["type"] as? String ?? "") ?? .none
         let privacy = Privacy(rawValue: self["privacy"] as? String ?? "") ?? .public
@@ -129,12 +138,13 @@ extension [String: Any] {
         let avatarImageURL = self["avatarImageURL"] as? String
         let avatarDicts = self["avatars"] as? [[String: Any]] ?? []
         let settingsDict = self["settings"] as? [String: Any] ?? [:]
+        let performances = (self["performances"] as? [[String: Any]] ?? Profile.defaultPerformances.map {$0.dictionary} ).map { $0.parsePerformance() }
         let settings = settingsDict.parseSettings
         
         let avatars: [Media] = avatarDicts.map { $0.parseMedia() }
         
 
-        return .init(id: _id, fullName: fullName, username: username, bio: bio, gender: gender, birthday: birthday, avatars: avatars, avatarImageURL: avatarImageURL, type: type, privacy: privacy, settings: settings)
+        return .init(id: _id, fullName: fullName, username: username, bio: bio, gender: gender, birthday: birthday, avatars: avatars, avatarImageURL: avatarImageURL, type: type, privacy: privacy, settings: settings, performances: performances)
     }
 }
 
@@ -170,6 +180,7 @@ extension Profile {
         }
         dict["type"] = self.type.rawValue
         dict["privacy"] = self.privacy.rawValue
+        dict["perfomances"] = self.performances.map { $0.dictionary }
         
         return dict
     }

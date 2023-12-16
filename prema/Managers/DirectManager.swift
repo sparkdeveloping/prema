@@ -63,13 +63,13 @@ class DirectManager: ObservableObject {
     
     func fetchInboxes() {
         if let profile = AccountManager.shared.currentProfile {
-            Firestore.firestore().collection("inbox").whereField("accepts", arrayContains: profile.id).order(by: "recentmessage.recentMessage.timestamp.time.time", descending: true).getDocuments { snapshot, error in
+            Firestore.firestore().collection("inbox").whereField("accepts", arrayContains: profile.id).order(by: "recentmessage.timestamp.time", descending: true).getDocuments { snapshot, error in
                 if let error {}
                 if let snapshot {
                     self.accepts = snapshot.documents.map { $0.data().parseInbox($0.documentID) }
                 }
             }
-            Firestore.firestore().collection("inbox").whereField("requests", arrayContains: profile.id).order(by: "recentmessage.recentMessage.timestamp.time.time", descending: true).getDocuments { snapshot, error in
+            Firestore.firestore().collection("inbox").whereField("requests", arrayContains: profile.id).order(by: "recentmessage.timestamp.time", descending: true).getDocuments { snapshot, error in
                 if let error {}
                 if let snapshot {
                     self.requests = snapshot.documents.map { $0.data().parseInbox($0.documentID) }

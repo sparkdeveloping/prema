@@ -32,7 +32,6 @@ struct DirectInbox: View {
     @StateObject var namespace = NamespaceWrapper.shared
     var body: some View {
         ScrollView(showsIndicators: false) {
-      
             VStack(spacing: 5) {
                 
                 CustomSelectorView(selection: $directManager.selectedDirectMode, strings: [
@@ -121,8 +120,9 @@ struct InboxCell: View {
                         Image(systemName: "bell.slash.fill")
                             .foregroundColor(Color.gray)
                     }
-                    if let message = inbox.recentMessage, message.timestamp.time < 60, viewModel.typingCount > 0 {
-                        Text(message.text ?? "")
+                    
+                    if let message = inbox.recentMessage, Date.now.timeIntervalSince1970 - message.timestamp.time < 300, viewModel.typingCount == 0 {
+                    Text(inbox.recentMessage?.text ?? "")
                             .font(.system(size: 12, weight: .regular, design: .rounded))
                             .foregroundColor(.secondary)
                             .lineLimit(1)
@@ -153,33 +153,23 @@ struct InboxCell: View {
             if let selection, selection.id == inbox.id {
                 Divider()
                     .padding(10)
+                Image(systemName: "star.fill")
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundColor(.orange)
+                    .padding(7)
+                    .padding(.horizontal, 10)
+                    .background(Color.secondary.opacity(0.1))
+                
+                    .cornerRadius(12)
+                //                        .shadow(color: .shadow, radius: 10, x: 0, y: 0  )
+                Spacer()
                 HStack {
-                    Spacer()
-                    Image(systemName: "trash.fill")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(.red)
-                        .padding(7)
-                        .padding(.horizontal, 10)
-                        .background(Color(.systemBackground))
-                        .cornerRadius(12)
-                    //                        .shadow(color: .shadow, radius: 10, x: 0, y: 0  )
-                    Spacer()
                     Image(systemName: "lock.fill")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundColor(.purple)
                         .padding(7)
                         .padding(.horizontal, 10)
-                        .background(Color(.systemBackground))
-                    
-                        .cornerRadius(12)
-                    //                        .shadow(color: .shadow, radius: 10, x: 0, y: 0  )
-                    Spacer()
-                    Image(systemName: "trash.fill")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(.orange)
-                        .padding(7)
-                        .padding(.horizontal, 10)
-                        .background(Color(.systemBackground))
+                        .background(Color.secondary.opacity(0.1))
                     
                         .cornerRadius(12)
                     //                        .shadow(color: .shadow, radius: 10, x: 0, y: 0  )
@@ -189,11 +179,23 @@ struct InboxCell: View {
                         .foregroundColor(.gray)
                         .padding(7)
                         .padding(.horizontal, 10)
-                        .background(Color(.systemBackground))
+                        .background(Color.secondary.opacity(0.1))
                     
                         .cornerRadius(12)
                     //                        .shadow(color: .shadow, radius: 10, x: 0, y: 0  )
                     Spacer()
+                    Button {
+                        
+                    } label: {
+                        Image(systemName: "trash.fill")
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundColor(.red)
+                            .padding(7)
+                            .padding(.horizontal, 10)
+                            .background(Color.secondary.opacity(0.1))
+                            .cornerRadius(12)
+                        //                        .shadow(color: .shadow, radius: 10, x: 0, y: 0  )
+                    }
                 }
             }
         }

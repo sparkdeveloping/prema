@@ -53,7 +53,7 @@ struct ChatView: View {
             .environmentObject(chatManager)
             .environmentObject(statusViewModel)
             .scaleEffect(message == nil ? 0.4:1)
-            .position(x: finalX, y:  finalY)
+            .position(x: AppearanceManager.shared.size.width / 2/*finalX*/, y:  finalY)
             .animation(.spring(), value: message)
             .animation(.spring(), value: finalX)
 
@@ -74,52 +74,111 @@ struct ChatView: View {
     }
     var body: some View {
         ZStack {
-            ZStack {
-                MessagesView(namespace: _namespace)
-                    .environmentObject(chatManager)
-                    .opacity(chatManager.reply == nil ? 1:0.1)
-                    .ignoresSafeArea()
-                    .simultaneousGesture(TapGesture().onEnded { _ in hideKeyboard()})
-
-            }
-            .onAppear {
-                chatManager.fetchMessages()
-                chatManager.listenForChatChanges()
-            }
-         
-            .onTapGesture {
-                withAnimation(.spring()) {
-                    chatManager.selectedMessage = nil
+            GeometryReader {
+                let size = $0.size
+                
+                ZStack {
+                    if chatManager.selection == "chat" {
+                        MessagesView(namespace: _namespace)
+                            .environmentObject(chatManager)
+                            .opacity(chatManager.reply == nil ? 1:0.1)
+                            .ignoresSafeArea()
+                            .simultaneousGesture(TapGesture().onEnded { _ in hideKeyboard()})
+                            .overlay {
+                                if chatManager.selectedMessage != nil {
+                                    Color.background.opacity(0.1)
+                                        .contentShape(.rect)
+                                        .onTapGesture {
+                                            withAnimation {
+                                                chatManager.selectedMessage = nil
+                                            }
+                                        }
+                                }
+                            }
+                    } else {
+                        if chatManager.visions.isEmpty {
+                            Text("You ")
+                        } else {
+                            ScrollView {
+                                if chatManager.visions.isEmpty {
+                                    VStack {
+                                        LottieView(name: "Empty")
+                                            .frame(width: size.width / 4, height: size.width / 4)
+                                            .verticalPadding(40)
+                                        Text("You do not have any Visions yet :(")
+                                            .font(.subheadline.bold())
+                                            .roundedFont()
+                                            .foregroundStyle(.secondary)
+                                        Button {
+                                            withAnimation(.spring()) {
+                                                navigation.showNewVision = true
+                                            }
+                                        } label: {
+                                            Text("Create My First Vision")
+                                                .bold()
+                                                .roundedFont()
+                                                .foregroundStyle(.white)
+                                                .buttonPadding()
+                                                .vibrantBackground(cornerRadius: 14, colorScheme: colorScheme)
+                                            
+                                        }
+                                        .topPadding(20)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                } else {
+                                    LazyVStack {
+                                        ForEach(chatManager.visions) { vision in
+                                            VisionCellView(vision: vision)
+                                        }
+                                    }
+                                    .padding()
+                                    .padding(.top, Double.blobHeight - safeAreaInsets.top)
+                                    .padding(.bottom, safeAreaInsets.bottom + 20)
+                                }
+                            }
+                        }
+                    }
                 }
-            }
+                .onAppear {
+                    chatManager.fetchMessages()
+                    chatManager.listenForChatChanges()
+                }
+                
+                .onTapGesture {
+                    withAnimation(.spring()) {
+                        chatManager.selectedMessage = nil
+                    }
+                }
                 chatContextMenuAndHeader
                     .opacity(chatManager.reply == nil ? 1:0.1)
                     .opacity(chatManager.selectedMessage == nil ? 0:1)
                     .simultaneousGesture(TapGesture().onEnded { _ in hideKeyboard()})
-
-            VStack {
-                if chatManager.selectedMessage == nil {
-                    ChatTextField()
-                        .environmentObject(chatManager)
-                        .environmentObject(appearance)
-                        .environmentObject(statusViewModel)
-                        .simultaneousGesture(TapGesture().onEnded { _ in hideKeyboard()})
-
-//                        .matchedGeometryEffect(id: "chatProfile-\(chatManager.inbox.id)", in: NamespaceWrapper.shared.namespace!)
-                }
                 
-                Spacer()
-     
-                ChatInputView()
-                    .environmentObject(chatManager)
-                    .ignoresSafeArea()
+                VStack {
+                    if chatManager.selectedMessage == nil {
+                        ChatTextField()
+                            .environmentObject(chatManager)
+                            .environmentObject(appearance)
+                            .environmentObject(statusViewModel)
+                            .simultaneousGesture(TapGesture().onEnded { _ in hideKeyboard()})
+                        
+                        //                        .matchedGeometryEffect(id: "chatProfile-\(chatManager.inbox.id)", in: NamespaceWrapper.shared.namespace!)
+                    }
+                    
+                    Spacer()
+                    if chatManager.selection == "chat" {
+                        
+                        ChatInputView()
+                            .environmentObject(chatManager)
+                            .ignoresSafeArea()
+                    }
                 }
-            .ignoresSafeArea()
-            .onChange(of: chatManager.currentChatMode) { _, v in
-                let defaults = UserDefaults.standard
-                defaults.set(v.rawValue, forKey: "\(chatManager.inbox.id)-chatmode")
+                .ignoresSafeArea()
+                .onChange(of: chatManager.currentChatMode) { _, v in
+                    let defaults = UserDefaults.standard
+                    defaults.set(v.rawValue, forKey: "\(chatManager.inbox.id)-chatmode")
+                }
             }
-       
         }
         .nonVibrantSecondaryBackground(cornerRadius: 0, colorScheme: colorScheme)
         .ignoresSafeArea()
@@ -133,7 +192,10 @@ struct MessagesView: View {
     
 
     @Environment (\.safeAreaInsets) var safeAreaInsets
+    @Environment (\.colorScheme) var colorScheme
     @Namespace var namespace
+    
+    
     
     var body: some View {
         GeometryReader { proxy in
@@ -143,23 +205,24 @@ struct MessagesView: View {
                         ChatBubble(message: message, namespace: _namespace)
                             
                             .matchedGeometryEffect(id: "chat-bubble-\(message.id)", in: namespace)
-                            .horizontalPadding(-20)
                             .listRowBackground(Color.clear)
                     }
                 }
-                .listRowBackground(Color.clear)
-                .padding(.top, safeAreaInsets.top + 50)
-                .padding(.bottom, 50)
+                .padding(.bottom, Double.blobHeight - safeAreaInsets.top)
+                .padding(.top, safeAreaInsets.bottom + 50 + (chatManager.reply?.frame.height ?? 0))
+                .ignoresSafeArea()
             }
+            .scrollContentBackground(.hidden)
+            .listStyle(.plain)
             .scrollIndicators(.hidden)
             .scrollDismissesKeyboard(.interactively)
             .rotationEffect(Angle(degrees: 180))
-            .background(Color.clear)
+            .background(Color.nonVibrant(colorScheme))
             .scrollContentBackground(.hidden)
             .keyboardAware()
         }
         .background(Color.clear)
-        .ignoresSafeArea()
+       
     }
     
 }
@@ -261,9 +324,7 @@ struct ChatBubble: View {
                         } else {
                             switch message.type {
                             case .text:
-                                Text(message.text ?? "")
-                                    .font(.system(size: 15, design: .rounded))
-                                    .foregroundColor(message.timestamp.profile.id == AccountManager.shared.currentProfile?.id ? .white:.primary)
+                                textMessage
                             case .audio:
                                 audioMessage
                             case .image, .video:
@@ -315,10 +376,32 @@ struct ChatBubble: View {
                             }
                         }
                     }
-                    .padding(.vertical ,message.type == .sticker ? 0:10)
-                    .padding(.horizontal, message.type == .sticker ? 0:20)
-                    .background(BubbleBackground.opacity(message.type == .sticker ? 0:1))
+                    .padding(.vertical, ((message.text ?? "").containsOnlyEmoji || message.type == .sticker) ? 0:(message.type == .sticker ? 0:10))
+                    .padding(.horizontal, ((message.text ?? "").containsOnlyEmoji || message.type == .sticker) ? 0:(message.type == .sticker ? 0:20))
+                    .background {
+                        if (!(message.text ?? "").containsOnlyEmoji && message.type != .sticker) {
+                            BubbleBackground
+                        }
+                    }
                     .clipShape(.rect(cornerRadii: .init(topLeading: fromMe ? 22:7, bottomLeading: 22, bottomTrailing: fromMe ? 7:22, topTrailing: 22)))
+                    .overlay(alignment: fromMe ? .bottomTrailing:.topLeading) {
+                        if message.expiry != nil {
+                            Image("Expire")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 12, height: 12)
+                                .opacity(0.5)
+                                .padding(4)
+                        }
+                        if message.destruction != nil {
+                            Image("Bomb")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 12, height: 12)
+                                .opacity(0.5)
+                                .padding(4)
+                        }
+                    }
                     .shadow(color: Color("Shadoww"), radius: 10, x: 0, y: 0)
                     .overlay(
                         GeometryReader { geometry in
@@ -335,13 +418,14 @@ struct ChatBubble: View {
                     )
                     .onTapGesture {
                         
-                        if let media = message.media {
+                        if let media = message.media, !media.isEmpty, viewModel.selectedMessage == nil {
                             withAnimation(.spring) {
                                 navigation.media = media
                             }
                         }
                         
-                    }.onScalingLongPress {                       self.isLongPressing.toggle()
+                    }.onScalingLongPress {
+                        self.isLongPressing.toggle()
                         self.haptic()
                     }
                     
@@ -363,7 +447,8 @@ struct ChatBubble: View {
             .opacity(viewModel.selectedMessage == nil ? 1:viewModel.selectedMessage != message ? 0.1:1)
         }
         .rotationEffect(Angle(degrees: 180))
-        .opacity(message.isSent ? 1:0.5)
+//        .opacity(message.isSent ? 1:0.5)
+        
     }
     
     var fromColors: [Color] {
@@ -375,7 +460,7 @@ struct ChatBubble: View {
     var toColors: [Color] {
         let isSensitive = message.expiry != nil
         let isDestructive = message.destruction != nil
-        return isDestructive ? [.red, .red]:isSensitive ? [.indigo, .purple]:[.secondary.opacity(0.1), .secondary.opacity(0.2)]
+        return isDestructive ? [.black, .black]:isSensitive ? [.indigo, .purple]:[.secondary.opacity(0.1), .secondary.opacity(0.2)]
     }
     
     var BubbleBackground: some View {
@@ -402,9 +487,10 @@ struct ChatBubble: View {
         }
     }
     
-    var TextMessage: some View {
+    var textMessage: some View {
         Text(message.text ?? "")
-            .font(.system(size: 15, design: .rounded))
+            .font(.system(size: (message.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines).containsOnlyEmoji ? 60:15, design: .rounded))
+            .foregroundColor(message.timestamp.profile.id == AccountManager.shared.currentProfile?.id ? .white:.primary)
     }
     
     @State var liveConfiguration: Waveform.Configuration = Waveform.Configuration(
@@ -666,6 +752,12 @@ struct ChatContextView: View {
                         Image(systemName: "trash.fill")
                             .font(.title2.bold())
                             .padding(10)
+                            .contentShape(.rect)
+                            .onTapGesture {
+                                withAnimation(.spring()) {
+                                    viewModel.deleteMessage()
+                                }
+                            }
                         
                     }
                 }
@@ -705,7 +797,8 @@ struct ChatInputView: View {
     @State var showAllOptions = false
     @EnvironmentObject var viewModel: ChatManager
     @Environment (\.safeAreaInsets) var safeAreaInsets
-
+    @Environment (\.colorScheme) var colorScheme
+    
     @StateObject private var audioRecorder: AudioRecorder = AudioRecorder()
     @StateObject private var audioPlayerManager: AudioPlayerManager = AudioPlayerManager()
     @StateObject private var statusObserver = TypingObserver()
@@ -733,7 +826,7 @@ struct ChatInputView: View {
             if let reply = self.viewModel.reply {
                 VStack(alignment: reply.timestamp.profile.id == AccountManager.shared.currentProfile?.id ? .trailing:.leading) {
                     HStack {
-                        Text("Replying \((reply.timestamp.profile.id == AccountManager.shared.currentProfile?.id ? "yourself":(self.inbox.members.first(where: {$0.id == reply.reply?.timestamp.profile.id })?.fullName ?? self.inbox.name)) ?? "")")
+                        Text("Replying \((reply.timestamp.profile.id == AccountManager.shared.currentProfile?.id ? "yourself":(self.inbox.members.first(where: {$0.id == reply.reply?.timestamp.profile.id })?.fullName ?? self.inbox.name)) )")
                             .font(.caption)
                             .italic()
                             .roundedFont()
@@ -873,11 +966,18 @@ struct ChatInputView: View {
                     }
                 } else {
                     HStack {
-                        ChatInputOptionsView
+                        if viewModel.text.isEmpty {
+                            ChatInputOptionsView
+                        }
                         TextField("Good morning", text: $viewModel.text, axis: .vertical)
                             .lineLimit(10)
+                            .onChange(of: viewModel.text, { _, t in
+                                withAnimation(.spring()) {
+                                    viewModel.text = t
+                                }
+                            })
                             .focused($isFocused)
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .font(.system(size: 16, weight: .regular, design: .rounded))
                             .overlay {
                                 HStack {
                                     Divider()
@@ -894,13 +994,7 @@ struct ChatInputView: View {
             .verticalPadding(5)
 //            .background(.regularMaterial)
             .clipShape(.rect(cornerRadius: 20, style: .continuous))
-                        .background {
-                            TransparentBlurView(removeAllFilters: true)
-                                .blur(radius: 6, opaque: false)
-                                .padding([.horizontal, .top], -12)
-                        }
-            .clipShape(.rect(cornerRadius: 20, style: .continuous))
-
+            .nonVibrantBlurBackground(cornerRadius: 20, colorScheme: colorScheme)
             .onChange(of: audioRecorder.isRecording) { _,newValue in
                 if newValue {
                     liveConfiguration = Waveform.Configuration(
@@ -923,7 +1017,18 @@ struct ChatInputView: View {
                 self.isFocused = newValue != nil
                 
             }
-            
+            .contextMenu {
+                Button("Regular") {
+                    viewModel.currentChatMode = .regular
+                }
+                Button("Sensitive") {
+                    viewModel.currentChatMode = .sensitive
+                }
+                Button("Destructive") {
+                    viewModel.currentChatMode = .destructive
+                }
+            }
+
         }
         .horizontalPadding()
         .bottomPadding(safeAreaInsets.bottom)
@@ -941,9 +1046,11 @@ struct ChatInputView: View {
     
     var ChatInputOptionsView: some View {
         HStack(spacing: 5) {
+            /*
             Image(systemName: "camera.fill")
                 .font(.system(size: 20, weight: .bold, design: .rounded))
                 .frame(width: 40, height: 40)
+             */
             //                .background(Blur())
             //                .cornerRadius(10)
             //                .shadow(color: .shadow, radius: 4, x: 2, y: 2)
@@ -1000,6 +1107,7 @@ struct ChatInputView: View {
         .shadow(color: Color("Shadoww"), radius: 10, x: 2, y: 2)
         .scaleEffect(shouldScale ? 0.8:1)
         .animation(.spring(response: 0.2), value: shouldScale)
+        
         .onTapGesture {
             shouldScale.toggle()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
@@ -1292,42 +1400,57 @@ struct ChatTextField: View {
     @Environment (\.safeAreaInsets) var safeAreaInsets
     @EnvironmentObject var viewModel: ChatManager
     @EnvironmentObject var appearance: AppearanceManager
-    
+    @State var showChatDetail = false
     @EnvironmentObject var statusViewModel: ActivityStatusManager
     var inbox: Inbox {
         return viewModel.inbox
     }
     @State var expand = false
+    
+    @State var selection = ""
     var body: some View {
         HStack {
      
             Spacer()
-            HStack {
-
-                HStack(spacing: 20) {
-
-                    Image(systemName: "video.fill")
-                        .font(.title2)
-                    Image(systemName: "phone.and.waveform.fill")
-                        .font(.title2)
+            VStack(alignment: .trailing) {
+                HStack {
                     
+                    HStack(spacing: 20) {
+                        
+                        Image(systemName: "video.fill")
+                            .font(.title2)
+                        Image(systemName: "phone.and.waveform.fill")
+                            .font(.title2)
+                        
+                    }
+                    .foregroundStyle(appearance.currentTheme.vibrantGradient)
+                    Divider()
+                        .frame(height: 20)
+                        .horizontalPadding(4)
+                    HStack {
+                        VStack(alignment: .trailing) {
+                            Text(inbox.name)
+                                .bold()
+                                .roundedFont()
+                            Text("\(statusViewModel.statusText)")
+                                .font(.subheadline.italic())
+                                .bold()
+                                .roundedFont()
+                                .foregroundStyle(statusViewModel.statusColor)
+                        }
+                        ProfileImageView(avatarImageURL: inbox.avatar)
+                            .frame(width: 40, height: 40)
+                    }
+                    .contentShape(.rect)
+                    .onTapGesture {
+                        self.showChatDetail.toggle()
+                    }
+                    .sheet(isPresented: $showChatDetail) {
+                        ChatDetailView(inbox: $viewModel.inbox)
+                    }
                 }
-                .foregroundStyle(appearance.currentTheme.vibrantGradient)
-                Divider()
-                    .frame(height: 20)
-                    .horizontalPadding(4)
-                VStack(alignment: .trailing) {
-                    Text(inbox.name)
-                        .bold()
-                        .roundedFont()
-                    Text("\(statusViewModel.statusText)")
-                        .font(.subheadline.italic())
-                        .bold()
-                        .roundedFont()
-                        .foregroundStyle(statusViewModel.statusColor)
-                }
-                ProfileImageView(avatarImageURL: inbox.avatar)
-                    .frame(width: 40, height: 40)
+          
+                
             }
             .verticalPadding(10)
             .horizontalPadding(20)
@@ -1335,24 +1458,13 @@ struct ChatTextField: View {
             .clipShape(.rect(cornerRadius: 24, style: .continuous))
             .shadow(color: Color("Shadoww"), radius: 20, x: 4, y: 10)
             .contextMenu {
-                Button("Regular") {
-                    viewModel.currentChatMode = .regular
-                    withAnimation(.spring()) {
-                        expand.toggle()
-                    }
+                Button("chat") {
+                    viewModel.selection = "chat"
                 }
-                Button("Sensitive") {
-                    viewModel.currentChatMode = .sensitive
-                    withAnimation(.spring()) {
-                        expand.toggle()
-                    }
+                Button("visions") {
+                    viewModel.selection = "visions"
                 }
-                Button("Destructive") {
-                    viewModel.currentChatMode = .destructive
-                    withAnimation(.spring()) {
-                        expand.toggle()
-                    }
-                }
+       
             }
             .matchedGeometryEffect(id: "chatProfile-\(inbox.id)", in: NamespaceWrapper.shared.namespace!)
             
@@ -1434,3 +1546,29 @@ struct ScalingLongPressModifier: ViewModifier {
     }
 }
 
+extension Character {
+    /// A simple emoji is one scalar and presented to the user as an Emoji
+    var isSimpleEmoji: Bool {
+        guard let firstScalar = unicodeScalars.first else { return false }
+        return firstScalar.properties.isEmoji && firstScalar.value > 0x238C
+    }
+
+    /// Checks if the scalars will be merged into an emoji
+    var isCombinedIntoEmoji: Bool { unicodeScalars.count > 1 && unicodeScalars.first?.properties.isEmoji ?? false }
+
+    var isEmoji: Bool { isSimpleEmoji || isCombinedIntoEmoji }
+}
+
+extension String {
+    var isSingleEmoji: Bool { count == 1 && containsEmoji }
+
+    var containsEmoji: Bool { contains { $0.isEmoji } }
+
+    var containsOnlyEmoji: Bool { !isEmpty && !contains { !$0.isEmoji } }
+
+    var emojiString: String { emojis.map { String($0) }.reduce("", +) }
+
+    var emojis: [Character] { filter { $0.isEmoji } }
+
+    var emojiScalars: [UnicodeScalar] { filter { $0.isEmoji }.flatMap { $0.unicodeScalars } }
+}

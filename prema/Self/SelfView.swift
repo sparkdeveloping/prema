@@ -23,7 +23,7 @@ struct SelfView: View {
             VisionsView()
                 .tag("Heart")
             Color.clear
-                .tag("Bell")
+                .tag("Trophy")
             Color.clear
                 .tag("Settings")
         }

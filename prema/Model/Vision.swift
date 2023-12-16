@@ -5,10 +5,18 @@
 //  Created by Denzel Nyatsanza on 11/5/23.
 //
 
+import SwiftUI
 import Foundation
 
 enum Recursion: String, Codable {
-    case never = "Never", daily = "Daily", weekly = "Weekly", monthly = "Monthly", yearly = "Yearly"
+    case never = "never", hourly = "hourly", daily = "daily", weekly = "weekly", monthly = "monthly", yearly = "yearly"
+    static var allCases: [Recursion] = [.never, .hourly, .daily, .weekly, .monthly, .yearly]
+}
+
+extension String {
+    var recursion: Recursion {
+        return Recursion(rawValue: self.lowercased()) ?? .never
+    }
 }
 
 enum MessageType: String, Codable {
@@ -31,11 +39,46 @@ class Vision: Identifiable, Equatable, Codable, Hashable, ObservableObject {
     var deadline: Double
     var visionaries: [Profile]
     var accepts: [String]
+    var requests: [String]
     var timestamps: [Timestamp]
     var completionTimestamp: Timestamp?
     @Published var tasks: [Task]
+    var priorityPercentage: Double {
+        // Filter tasks that are completed
+        let completedTasks = tasks.filter { $0.completionTimestamp != nil }
+
+        // Calculate the percentage of completed tasks
+        let completionPercentage = Double(completedTasks.count) / Double(tasks.count)
+        
+        // Calculate the average proximity of tasks to the deadline
+        let deadlineProximity = tasks.map { task in
+            abs(task.end - deadline)
+        }.reduce(0, +) / Double(tasks.count)
+        
+        // Combine completion percentage and deadline proximity to get overall priority
+        let overallPriority = (completionPercentage + (1 - deadlineProximity)) / 2.0
+        
+        // Convert to percentage (0-100)
+        let priorityPercentage = overallPriority * 100.0
+        
+        return priorityPercentage
+    }
     
-    init(id: String, title: String, category: String, privacy: Privacy, comments: [Message], deadline: Double, visionaries: [Profile], accepts: [String], timestamps: [Timestamp], completionTimestamp: Timestamp? = nil, tasks: [Task]) {
+    var priority: String {
+        if self.deadline - Date.now.timeIntervalSince1970 < 0 {
+            return self.tasks.count == self.tasks.filter { $0.completionTimestamp != nil }.count ? "COMPLETED" : "PAST DUE"
+        }
+        return priorityPercentage >= 75 ? "SERIOUS":priorityPercentage >= 50 ? "HIGH":priorityPercentage >= 30 ? "MEDIUM":"LOW"
+    }
+    
+    var priorityColor: Color {
+        if self.deadline - Date.now.timeIntervalSince1970 < 0 {
+            return self.tasks.count == self.tasks.filter { $0.completionTimestamp != nil }.count ? AppearanceManager.shared.currentTheme.vibrantColors[0] : .red
+        }
+        return priorityPercentage >= 75 ? .red:priorityPercentage >= 50 ? .orange:priorityPercentage >= 30 ? .blue:.green
+    }
+    
+    init(id: String, title: String, category: String, privacy: Privacy, comments: [Message], deadline: Double, visionaries: [Profile], accepts: [String], requests: [String], timestamps: [Timestamp], completionTimestamp: Timestamp? = nil, tasks: [Task]) {
         self.id = id
         self.title = title
         self.category = category
@@ -44,6 +87,7 @@ class Vision: Identifiable, Equatable, Codable, Hashable, ObservableObject {
         self.deadline = deadline
         self.visionaries = visionaries
         self.accepts = accepts
+        self.requests = requests
         self.timestamps = timestamps
         self.completionTimestamp = completionTimestamp
         self.tasks = tasks
@@ -58,6 +102,7 @@ class Vision: Identifiable, Equatable, Codable, Hashable, ObservableObject {
             case deadline
             case visionaries
             case accepts
+            case requests
             case timestamps
             case completionTimestamp
             case tasks
@@ -72,7 +117,8 @@ class Vision: Identifiable, Equatable, Codable, Hashable, ObservableObject {
             comments = try container.decode([Message].self, forKey: .comments)
             deadline = try container.decode(Double.self, forKey: .deadline)
             visionaries = try container.decode([Profile].self, forKey: .visionaries)
-            accepts = try container.decode([String].self, forKey: .accepts)
+        accepts = try container.decode([String].self, forKey: .accepts)
+        requests = try container.decode([String].self, forKey: .requests)
             timestamps = try container.decode([Timestamp].self, forKey: .timestamps)
             completionTimestamp = try container.decodeIfPresent(Timestamp.self, forKey: .completionTimestamp)
             tasks = try container.decode([Task].self, forKey: .tasks)
@@ -88,11 +134,29 @@ class Vision: Identifiable, Equatable, Codable, Hashable, ObservableObject {
             try container.encode(deadline, forKey: .deadline)
             try container.encode(visionaries, forKey: .visionaries)
             try container.encode(accepts, forKey: .accepts)
+            try container.encode(requests, forKey: .requests)
             try container.encode(timestamps, forKey: .timestamps)
             try container.encode(completionTimestamp, forKey: .completionTimestamp)
             try container.encode(tasks, forKey: .tasks)
         }
     
+    var dictionary: [String: Any] {
+        var dict: [String : Any] = [:]
+        dict["id"] = self.id
+        dict["title"] = self.title
+        dict["category"] = self.category
+        dict["privacy"] = self.privacy.rawValue
+        dict["comments"] = self.comments.map {$0.dictionary}
+        dict["deadline"] = self.deadline
+        dict["visionaries"] = self.visionaries.map {$0.dictionary}
+        dict["accepts"] = self.accepts
+        dict["requests"] = self.requests
+        dict["timestamps"] = self.timestamps.map {$0.dictionary}
+        dict["completionTimestamp"] = self.completionTimestamp.map {$0.dictionary}
+        dict["tasks"] = self.tasks
+        dict[""] = self.id
+        return dict
+    }
 }
 
 extension [String: Any] {
@@ -110,24 +174,79 @@ extension [String: Any] {
         let deadline = self["deadline"] as? Double ?? Date.now.timeIntervalSince1970
         let visionaries = (self["visionaries"] as? [[String: Any]] ?? []).map { $0.parseProfile() }
         let accepts = self["accepts"] as? [String] ?? []
+        let requests = self["requests"] as? [String] ?? []
         let timestamps = (self["timestamps"] as? [[String: Any]] ?? []).map { $0.parseTimestamp() }
         let completionTimestamp = (self["completionTimestamp"] as? [String: Any])?.parseTimestamp()
         let tasks = (self["tasks"] as? [[String: Any]] ?? []).map { $0.parseTask() }
         
-        return .init(id: _id, title: title, category: category, privacy: privacy, comments: comments, deadline: deadline, visionaries: visionaries, accepts: accepts, timestamps: timestamps, completionTimestamp: completionTimestamp, tasks: tasks)
+        return .init(id: _id, title: title, category: category, privacy: privacy, comments: comments, deadline: deadline, visionaries: visionaries, accepts: accepts, requests: requests, timestamps: timestamps, completionTimestamp: completionTimestamp, tasks: tasks)
     }
 }
 
-class Task: Identifiable, Codable {
+class Task: Identifiable, Codable, ObservableObject {
+    // Properties
     var id: String
-    var title: String
-    var start: Double
-    var end: Double
-    var responsibles: [Profile]
-    var timestamps: [Timestamp]
-    var completionTimestamp: Timestamp?
-    var recursion: Recursion
+    @Published var title: String
+    @Published var start: Double
+    @Published var end: Double
+    @Published var responsibles: [Profile]
+    @Published var timestamps: [Timestamp]
+    @Published var completionTimestamp: Timestamp?
+    @Published var recursion: Recursion
+    @Published var reminder: Reminder
     
+    // Keys for encoding/decoding
+    enum CodingKeys: String, CodingKey {
+        case id
+        case title
+        case start
+        case end
+        case responsibles
+        case timestamps
+        case completionTimestamp
+        case recursion
+    }
+
+    // Initializer
+    init(id: String, title: String, start: Double, end: Double, responsibles: [Profile], timestamps: [Timestamp], completionTimestamp: Timestamp? = nil, recursion: Recursion, reminder: Reminder = Reminder()) {
+        self.id = id
+        self.title = title
+        self.start = start
+        self.end = end
+        self.responsibles = responsibles
+        self.timestamps = timestamps
+        self.completionTimestamp = completionTimestamp
+        self.recursion = recursion
+        self.reminder = reminder
+    }
+
+    // Codable methods
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        title = try container.decode(String.self, forKey: .title)
+        start = try container.decode(Double.self, forKey: .start)
+        end = try container.decode(Double.self, forKey: .end)
+        responsibles = try container.decode([Profile].self, forKey: .responsibles)
+        timestamps = try container.decode([Timestamp].self, forKey: .timestamps)
+        completionTimestamp = try container.decodeIfPresent(Timestamp.self, forKey: .completionTimestamp)
+        recursion = try container.decode(Recursion.self, forKey: .recursion)
+        reminder = Reminder()  // You may need to implement Reminder decoding if needed
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(title, forKey: .title)
+        try container.encode(start, forKey: .start)
+        try container.encode(end, forKey: .end)
+        try container.encode(responsibles, forKey: .responsibles)
+        try container.encode(timestamps, forKey: .timestamps)
+        try container.encode(completionTimestamp, forKey: .completionTimestamp)
+        try container.encode(recursion, forKey: .recursion)
+    }
+    
+    // Additional methods
     var dictionary: [String: Any] {
         var dict: [String: Any] = [:]
         
@@ -141,21 +260,41 @@ class Task: Identifiable, Codable {
         dict["recursion"] = self.recursion.rawValue
 
         return dict
-        
-    }
-    
-    init(id: String, title: String, start: Double, end: Double, responsibles: [Profile], timestamps: [Timestamp], completionTimestamp: Timestamp? = nil, recursion: Recursion) {
-        self.id = id
-        self.title = title
-        self.start = start
-        self.end = end
-        self.responsibles = responsibles
-        self.timestamps = timestamps
-        self.completionTimestamp = completionTimestamp
-        self.recursion = recursion
     }
 }
 
+
+struct Reminder: Codable {
+  var timeInterval: Double?
+  var date: Double?
+  var location: LocationReminder?
+  var reminderType: ReminderType = .time
+  var repeats = false
+}
+
+//extension [String: Any] {
+//    func parseReminder() -> Reminder {//(_ id: String? = nil) -> Reminder {
+////        var _id = self["id"] as? String ?? UUID
+//        
+//        let timeInterval = self["timeInterval"] as? Double
+//        let timeInterval = self["timeInterval"] as? Double
+//        let timeInterval = self["timeInterval"] as? Double
+//        let timeInterval = self["timeInterval"] as? Double
+//    }
+//}
+
+struct LocationReminder: Codable {
+  var latitude: Double
+  var longitude: Double
+  var radius: Double
+}
+
+enum ReminderType: Int, CaseIterable, Identifiable, Codable {
+  case time
+  case calendar
+  case location
+  var id: Int { self.rawValue }
+}
 extension [String: Any] {
     
     func parseTask(_ id: String? = nil) -> Task {
@@ -166,6 +305,7 @@ extension [String: Any] {
         }
         
         let title = self["title"] as? String ?? ""
+        let reminder = (self["reminder"] as? [String: Any] ?? [:])
         let recursion = Recursion(rawValue: (self["recursion"] as? String ?? "never")) ?? .never
         let start = self["start"] as? Double ?? Date.now.timeIntervalSince1970
         let end = self["end"] as? Double ?? Date.now.timeIntervalSince1970
@@ -268,7 +408,7 @@ class Message: ObservableObject, Identifiable, Equatable, Codable {
     var sticker: Sticker?
     var text: String?
     var timestamp: Timestamp
-    
+  
     var destruction: Double? = nil
     var expiry: Double? = nil
     
@@ -309,7 +449,8 @@ extension [String : Any] {
         let media = mediaDict.map { $0.parseMedia() }
         let inboxID = self["inboxID"] as? String ?? UUID().uuidString
         let timestampDict = self["timestamp"] as? [String: Any] ?? [:]
-        
+        let reply = (self["reply"] as? [String: Any])?.parseMessage()
+
         let destruction = self["destruction"] as? Double
         let expiry = self["expiry"] as? Double
         
@@ -319,8 +460,10 @@ extension [String : Any] {
         
         let openedDict = self["opened"] as? [[String: Any]] ?? []
         let opened = openedDict.map { $0.parseTimestamp() }
-        
-        return .init(id: _id, inboxID: inboxID, type: type, media: media, sticker: sticker, text: text, timestamp: timestamp, destruction: destruction, expiry: expiry, isSent: true, opened: opened)
+        let message = Message.init(id: _id, inboxID: inboxID, type: type, media: media, sticker: sticker, text: text, timestamp: timestamp, destruction: destruction, expiry: expiry, isSent: true, opened: opened)
+        reply?.isReply = true
+        message.reply = reply
+        return message
     }
 }
 

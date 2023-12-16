@@ -36,7 +36,7 @@ class ChatManager: ObservableObject {
         }
     }
     @Published var inbox: Inbox
-
+    @Published var selection = "chat"
     @Published var reply: Message?
     @Published var text = ""
     @Published var reaction: String?
@@ -51,7 +51,11 @@ class ChatManager: ObservableObject {
      var lastMessageDoc: DocumentSnapshot?
     
     let db = Firestore.firestore()
-    
+    @StateObject var selfManager = SelfManager.shared
+
+    var visions: [Vision] {
+        return selfManager.visions.filter({$0.visionaries.contains(where: { $0.id == inbox.members.first(where: {$0.id != AccountManager.shared.currentProfile?.id})?.id})})
+    }
  
     init(_ inbox: Inbox) {
         self.inbox = inbox
@@ -71,6 +75,11 @@ class ChatManager: ObservableObject {
 
     }
     
+    func deleteMessage() {
+        guard let id = selectedMessage?.id else { return }
+        Ref.firestoreDb.collection("inbox").document(inbox.id).collection("messages").document(id).delete()
+    }
+    
     func sendMessage() {
         
       
@@ -87,9 +96,21 @@ class ChatManager: ObservableObject {
             if let sticker {
                 type = .sticker
             }
+            var ts: Double? = nil
+            switch currentChatMode {
+            case .regular:
+                break
+            case .sensitive:
+                ts = Date.now.timeIntervalSince1970 + 180
+            case .destructive:
+                ts = Date.now.timeIntervalSince1970 + 180
+            }
             
-            let message = Message(id: id, inboxID: inbox.id, type: type, media: media, sticker: sticker, text: text.isEmpty ? nil:text, timestamp: timestamp, opened: [])
+          
             
+            let message = Message(id: id, inboxID: inbox.id, type: type, media: media, sticker: sticker, text: text.isEmpty ? nil:text, timestamp: timestamp, destruction: currentChatMode == .destructive  ? ts:nil, expiry: currentChatMode == .sensitive  ? ts:nil, opened: [])
+            reply?.isReply = true
+            message.reply = reply
             let inbox = Inbox(id: inbox.id, members: inbox.members, requests: inbox.requests, accepts: inbox.accepts, recentMessage: message, creationTimestamp: inbox.creationTimestamp, unreadDict: [:])
             
 
@@ -119,7 +140,8 @@ class ChatManager: ObservableObject {
             self.text = ""
             self.media.removeAll()
             self.inbox = inboxDict.parseInbox()
-            
+            self.selectedMessage = nil
+            self.reply = nil
         }
     }
     
@@ -145,6 +167,7 @@ class ChatManager: ObservableObject {
                     let message = self.messages[index]
                     message.isSent = true
                     self.messages[index] = message
+                    self.messages[index].isSent = true
                 }
             }
         }

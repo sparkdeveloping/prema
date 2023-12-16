@@ -55,6 +55,8 @@
 		DB1A43F12B0D32C000826D6B /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB1A43F02B0D32C000826D6B /* Product.swift */; };
 		DB1A43F32B0D37AB00826D6B /* ShopperManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB1A43F22B0D37AB00826D6B /* ShopperManager.swift */; };
 		DB2B74862B1D3EED009F0977 /* MediaPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB2B74852B1D3EED009F0977 /* MediaPlayerView.swift */; };
+		DB46903A2B1FDA63004DE53E /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4690392B1FDA62004DE53E /* NotificationManager.swift */; };
+		DB46903C2B20C318004DE53E /* ChatDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB46903B2B20C318004DE53E /* ChatDetailView.swift */; };
 		DB49E60D2AF8888B007789DC /* NavigationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB49E60C2AF8888B007789DC /* NavigationManager.swift */; };
 		DB49E6102AF88996007789DC /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB49E60F2AF88996007789DC /* ProfileView.swift */; };
 		DB49E6122AF889B1007789DC /* VisionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB49E6112AF889B1007789DC /* VisionsView.swift */; };
@@ -71,6 +73,8 @@
 		DB6DC9932AC8312400F381CF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DB6DC9752AC8311F00F381CF /* Assets.xcassets */; };
 		DB6DC9962AC8312400F381CF /* premaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6DC97A2AC8312100F381CF /* premaApp.swift */; };
 		DB6DC9982AC8312400F381CF /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DB6DC97E2AC8312200F381CF /* Preview Assets.xcassets */; };
+		DB7F6A8C2B2DFF0900511D91 /* Empty.json in Resources */ = {isa = PBXBuildFile; fileRef = DB7F6A8B2B2DFF0900511D91 /* Empty.json */; };
+		DB7F6A8F2B2E024500511D91 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = DB7F6A8E2B2E024500511D91 /* Lottie */; };
 		DB9623AB2B1CE52D00DC7D8F /* TransparentBlurView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB9623AA2B1CE52D00DC7D8F /* TransparentBlurView.swift */; };
 		DB986F442AF699A60038F123 /* ExyteMediaPicker in Frameworks */ = {isa = PBXBuildFile; productRef = DB986F432AF699A60038F123 /* ExyteMediaPicker */; };
 		DB986F472AF6A9CC0038F123 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = DB986F462AF6A9CC0038F123 /* SDWebImageSwiftUI */; };
@@ -172,6 +176,8 @@
 		DB1A43F22B0D37AB00826D6B /* ShopperManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopperManager.swift; sourceTree = "<group>"; };
 		DB2B74852B1D3EED009F0977 /* MediaPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPlayerView.swift; sourceTree = "<group>"; };
 		DB2F8A1F2AB687F100713B5B /* prema.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = prema.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB4690392B1FDA62004DE53E /* NotificationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		DB46903B2B20C318004DE53E /* ChatDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatDetailView.swift; sourceTree = "<group>"; };
 		DB49E60C2AF8888B007789DC /* NavigationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationManager.swift; sourceTree = "<group>"; };
 		DB49E60F2AF88996007789DC /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		DB49E6112AF889B1007789DC /* VisionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionsView.swift; sourceTree = "<group>"; };
@@ -189,6 +195,7 @@
 		DB6DC9752AC8311F00F381CF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DB6DC97A2AC8312100F381CF /* premaApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = premaApp.swift; sourceTree = "<group>"; };
 		DB6DC97E2AC8312200F381CF /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		DB7F6A8B2B2DFF0900511D91 /* Empty.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Empty.json; sourceTree = "<group>"; };
 		DB9623AA2B1CE52D00DC7D8F /* TransparentBlurView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransparentBlurView.swift; sourceTree = "<group>"; };
 		DBA2C5D92B0F9CB600893CF1 /* MediaPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaPicker.swift; sourceTree = "<group>"; };
 		DBA2C5DC2B0FA98500893CF1 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
@@ -246,6 +253,7 @@
 				DB013FE52AF55FDF0053A376 /* FirebaseAnalyticsSwift in Frameworks */,
 				DB013FE12AF55FDF0053A376 /* FirebaseAnalytics in Frameworks */,
 				DB013FE32AF55FDF0053A376 /* FirebaseAnalyticsOnDeviceConversion in Frameworks */,
+				DB7F6A8F2B2E024500511D91 /* Lottie in Frameworks */,
 				DBA2C59B2B0F940C00893CF1 /* VideoPlayer in Frameworks */,
 				DB0140092AF55FDF0053A376 /* FirebaseMLModelDownloader in Frameworks */,
 				DB013FFD2AF55FDF0053A376 /* FirebaseFirestoreSwift in Frameworks */,
@@ -315,6 +323,7 @@
 		DB0080FD2AF4240300C085C8 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				DB4690392B1FDA62004DE53E /* NotificationManager.swift */,
 				DBE49AEA2B0ECE13005FBFD1 /* CameraManager.swift */,
 				DBE49AC62B0ECC9E005FBFD1 /* Camera */,
 				DBAEE9442B0A860500AF1BE2 /* CreateStickerViewModel.swift */,
@@ -415,6 +424,7 @@
 				DBAEE9422B0A84FC00AF1BE2 /* Ref.swift */,
 				DB6DC97A2AC8312100F381CF /* premaApp.swift */,
 				DB2B74852B1D3EED009F0977 /* MediaPlayerView.swift */,
+				DB7F6A8B2B2DFF0900511D91 /* Empty.json */,
 				DB0081102AF443C300C085C8 /* Info.plist */,
 				DBAEE9482B0A92F500AF1BE2 /* ViewExtensions.swift */,
 				DBA2C5DB2B0FA97800893CF1 /* Camera */,
@@ -453,6 +463,7 @@
 				DB49E61A2AF930E4007789DC /* DirectView.swift */,
 				DBE49AA92B0E0CFA005FBFD1 /* DirectInbox.swift */,
 				DBB0514F2B05DADA0008A002 /* ChatView.swift */,
+				DB46903B2B20C318004DE53E /* ChatDetailView.swift */,
 			);
 			path = Direct;
 			sourceTree = "<group>";
@@ -587,6 +598,7 @@
 				DBA2C5972B0F92C500893CF1 /* YPImagePicker */,
 				DBA2C59A2B0F940C00893CF1 /* VideoPlayer */,
 				DBA537502B18619600029606 /* Algorithms */,
+				DB7F6A8E2B2E024500511D91 /* Lottie */,
 			);
 			productName = prema;
 			productReference = DB2F8A1F2AB687F100713B5B /* prema.app */;
@@ -651,6 +663,7 @@
 				DBA2C5962B0F92C500893CF1 /* XCRemoteSwiftPackageReference "YPImagePicker" */,
 				DBA2C5992B0F940C00893CF1 /* XCRemoteSwiftPackageReference "VideoPlayer" */,
 				DBA5374F2B18619600029606 /* XCRemoteSwiftPackageReference "swift-algorithms" */,
+				DB7F6A8D2B2DFFEC00511D91 /* XCRemoteSwiftPackageReference "lottie-spm" */,
 			);
 			productRefGroup = DB2F8A202AB687F100713B5B /* Products */;
 			projectDirPath = "";
@@ -671,6 +684,7 @@
 				DB0081162AF445AD00C085C8 /* alba.ttf in Resources */,
 				DB01401D2AF57D930053A376 /* GoogleService-Info.plist in Resources */,
 				DB0081142AF445AD00C085C8 /* albabold.ttf in Resources */,
+				DB7F6A8C2B2DFF0900511D91 /* Empty.json in Resources */,
 				DB6DC9982AC8312400F381CF /* Preview Assets.xcassets in Resources */,
 				DB6DC9932AC8312400F381CF /* Assets.xcassets in Resources */,
 				DB1060C52AFD289E00ABFBDC /* Launch Screen.storyboard in Resources */,
@@ -700,6 +714,7 @@
 				DB0140192AF562380053A376 /* Profile.swift in Sources */,
 				DBE49AAA2B0E0CFA005FBFD1 /* DirectInbox.swift in Sources */,
 				DB2B74862B1D3EED009F0977 /* MediaPlayerView.swift in Sources */,
+				DB46903C2B20C318004DE53E /* ChatDetailView.swift in Sources */,
 				DBB051502B05DADA0008A002 /* ChatView.swift in Sources */,
 				DBE49ADA2B0ECC9E005FBFD1 /* NextLevelGIFCreator.swift in Sources */,
 				DB1A43EF2B0D30F700826D6B /* ShopperView.swift in Sources */,
@@ -736,6 +751,7 @@
 				DBE49AE22B0ECC9E005FBFD1 /* NextLevel+CMSampleBuffer.swift in Sources */,
 				DB49E60D2AF8888B007789DC /* NavigationManager.swift in Sources */,
 				DBA2C5DA2B0F9CB600893CF1 /* MediaPicker.swift in Sources */,
+				DB46903A2B1FDA63004DE53E /* NotificationManager.swift in Sources */,
 				DB0080FF2AF4241800C085C8 /* AppearanceManager.swift in Sources */,
 				DBE49AD72B0ECC9E005FBFD1 /* NextLevel+Metadata.swift in Sources */,
 				DBE49AE02B0ECC9E005FBFD1 /* NextLevelConfiguration.swift in Sources */,
@@ -1070,6 +1086,14 @@
 				minimumVersion = 10.17.0;
 			};
 		};
+		DB7F6A8D2B2DFFEC00511D91 /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-spm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.3.4;
+			};
+		};
 		DB986F422AF699A50038F123 /* XCRemoteSwiftPackageReference "ExyteMediaPicker" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/exyte/ExyteMediaPicker.git";
@@ -1279,6 +1303,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DB013FDF2AF55FDF0053A376 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = "FirebaseStorageCombine-Community";
+		};
+		DB7F6A8E2B2E024500511D91 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DB7F6A8D2B2DFFEC00511D91 /* XCRemoteSwiftPackageReference "lottie-spm" */;
+			productName = Lottie;
 		};
 		DB986F432AF699A60038F123 /* ExyteMediaPicker */ = {
 			isa = XCSwiftPackageProductDependency;

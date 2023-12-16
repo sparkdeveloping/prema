@@ -20,6 +20,17 @@ exports.sendDirectNotifications = functions.firestore
 
     const message = data.recentMessage;
     const type = message.type;
+    const title =
+      data.members.length > 2
+        ? data.members
+            .map((member) => member.fullName)
+            .map((name) => name[0])
+            .join("")
+        : message.timestamp.profile.fullName;
+
+    if (data.displayName) {
+      title = data.displayName;
+    }
     var messageText = "New Message";
     console.log(`this is the print 0}`);
 
@@ -31,26 +42,28 @@ exports.sendDirectNotifications = functions.firestore
       }
     }
     if (type == "image") {
-      messageText = "Image📸";
+      messageText = " an Image📸";
     }
     if (type == "video") {
-      messageText = "Video🎥";
+      messageText = " a Video🎥";
     }
     if (type == "sticker") {
-      messageText = "Sticker🌞";
+      messageText = " a Sticker🌞";
     }
 
     if (data.expiry) {
-      messageText = "Sensitive Message🔒";
+      messageText = " a Sensitive Message🔒";
     }
 
     if (data.destruction) {
-      messageText = "Destructive Message💣";
+      messageText = " a Destructive Message💣";
     }
 
     messageText =
       data.members.length > 2
-        ? `@${message.timestamp.profile.username} sent a ${messageText}`
+        ? `@${message.timestamp.profile.username}: ${
+            type == "text" ? "" : "sent"
+          }${messageText}`
         : "";
 
     if (data.accepts.length > 0) {
@@ -58,7 +71,7 @@ exports.sendDirectNotifications = functions.firestore
         if (recipient != message.timestamp.profile.id) {
           const payload = {
             notification: {
-              title: message.timestamp.profile.fullName,
+              title: title,
               body: messageText,
               mutable_content: "true",
             },
@@ -80,7 +93,7 @@ exports.sendDirectNotifications = functions.firestore
       data.requests.forEach((recipient) => {
         const payload = {
           notification: {
-            title: message.timestamp.profile.fullName,
+            title: title,
             body:
               data.members.length > 2
                 ? "Added you to a new group👥"

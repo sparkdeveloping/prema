@@ -24,9 +24,14 @@ struct MainView: View {
 
     @State var appeared = false
     @State var size: CGSize = .zero
+    
     init() {
         
         NamespaceWrapper.shared.namespace = namespacee
+        
+        UITableView.appearance().separatorStyle = .none
+        UITableViewCell.appearance().backgroundColor = UIColor(Color.clear)
+        UITableView.appearance().backgroundColor = UIColor(Color.clear)
         
         if let profile = accountManager.currentProfile {
             let topic = profile.id + "direct"
@@ -57,6 +62,7 @@ struct MainView: View {
                             .ignoresSafeArea()
                             .environmentObject(appearance)
                             .navigationDestination(for: Inbox.self) { inbox in
+                                
                                 ChatView()
                                     .environmentObject(ChatManager(inbox))
                                     .toolbar(.hidden)
@@ -73,6 +79,10 @@ struct MainView: View {
                             }
                             .navigationDestination(for: Vision.self) { vision in
                                 VisionDetailView(vision: vision)
+                                    .toolbar(.hidden)
+                            }
+                            .navigationDestination(for: Profile.self) { vision in
+                                ProfileView(profile: vision)
                                     .toolbar(.hidden)
                             }
                             .onReceive(navigation.$notificationInboxID) {
@@ -108,48 +118,29 @@ struct MainView: View {
                     .background(
                         Color.nonVibrantSecondary(colorScheme))
                     .overlay(alignment: .bottom) {
-                            HStack {
-                                Image(navigation.showSidebar ? "Cancel":"Menu")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 20, height: 20)
-                                    .rotationEffect(.radians(navigation.showSidebar ? .pi:0))
-                                    .foregroundStyle(navigation.showSidebar ? .red:.secondary)
-                                    .padding()
-                                    .nonVibrantBackground(cornerRadius: 20, colorScheme: colorScheme)
-                                    .onTapGesture {
-                                        withAnimation(.spring()) {
-                                            navigation.showSidebar.toggle()
-                                        }
-                                    }
-                                HStack {
-                                    ForEach(navigation.tabs, id: \.self) { tab in
-                                        TabButton(imageName: tab)
-                                    }
-                                }
-                                .frame(height: 60)
-                                .nonVibrantBackground(cornerRadius: 20, colorScheme: colorScheme)
-                                if navigation.selectedTab == .camera {
-                                    Spacer()
-                                }
-                                
-                            }
-                            .offset(y: navigation.path.isEmpty ? 0: 100)
-                            .bottomPadding(safeAreaInsets.bottom)
-                            .horizontalPadding()
+                           TabBarView()
                     }
                     .overlay {
                         Color.clear.nonVibrantBackground(cornerRadius: 0, colorScheme: colorScheme)
                             .opacity((navigation.showNewVision || navigation.showNewTaskVision != nil) ? 0.9:0)
                             .ignoresSafeArea()
-                        NewVisionView()
-                            .offset(y: navigation.showNewVision  ? 0:appearance.size.height)
-                            .environmentObject(selfManager)
-                        if let vision = navigation.showNewTaskVision {
-                            NewTaskView(vision: vision)
-                                .offset(y: navigation.showNewTaskVision != nil ? 0:appearance.size.height)
+                        if navigation.showNewVision {
+                            NewVisionView()
+                                .transition(.scale)                                .opacity(navigation.showNewVision ? 1:0)
                                 .environmentObject(selfManager)
                         }
+                        if let vision = navigation.showNewTaskVision {
+                            NewTaskView(vision: vision)
+                                .transition(.scale)                                .opacity(navigation.showNewTaskVision != nil ? 1:0)
+                                .environmentObject(selfManager)
+                            
+                        }
+                    }
+                    .onChange(of: navigation.showNewVision) { _, _ in
+                            haptic()
+                    }
+                    .onChange(of: navigation.showNewTaskVision) { _, _ in
+                            haptic()
                     }
                 }
                 
@@ -167,6 +158,9 @@ struct MainView: View {
                             .matchedGeometryEffect(id: "mediaplayer-\(media[0].id)", in: namespace.namespace!)
                     }
                 }
+            }
+            .overlay {
+//                PasscodeView()
             }
             .onAppear {
                 self.size = size
@@ -221,6 +215,48 @@ struct MainView: View {
     }
 }
 
+struct TabBarView: View {
+    
+    @EnvironmentObject var navigation: NavigationManager
+    @StateObject var selfManager = SelfManager.shared
+    @Environment(\.safeAreaInsets) var safeAreaInsets
+    @Environment(\.colorScheme) var colorScheme
+
+
+    @State var appeared = false
+    @State var size: CGSize = .zero
+    var body: some View {
+        HStack {
+            Image(navigation.showSidebar ? "Cancel":"Menu")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 20, height: 20)
+                .rotationEffect(.radians(navigation.showSidebar ? .pi:0))
+                .foregroundStyle(navigation.showSidebar ? .red:.secondary)
+                .padding()
+                .nonVibrantBackground(cornerRadius: 20, colorScheme: colorScheme)
+                .onTapGesture {
+                    withAnimation(.spring()) {
+                        navigation.showSidebar.toggle()
+                    }
+                }
+            HStack {
+                ForEach(navigation.tabs, id: \.self) { tab in
+                    TabButton(imageName: tab)
+                }
+            }
+            .frame(height: 60)
+            .nonVibrantBackground(cornerRadius: 20, colorScheme: colorScheme)
+            if navigation.selectedTab == .camera {
+                Spacer()
+            }
+        }
+        .offset(y: navigation.path.isEmpty ? 0: 100)
+        .bottomPadding(safeAreaInsets.bottom)
+        .horizontalPadding()
+    }
+}
+
 
 class NamespaceWrapper: ObservableObject {
     internal init(namespace: Namespace.ID? = nil) {
@@ -230,4 +266,68 @@ class NamespaceWrapper: ObservableObject {
     var namespace: Namespace.ID? = nil
     static var shared = NamespaceWrapper()
     
+}
+
+struct PasscodeView: View {
+    @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject var appearance: AppearanceManager
+
+    @State var input1 = ""
+    @State var input2 = ""
+    @State var input3 = ""
+    @State var input4 = ""
+    
+    var body: some View {
+        ZStack {
+            Color.nonVibrantSecondary(colorScheme)
+            
+            VStack {
+                HStack {
+                    Spacer()
+                    Circle()
+                        .fill(input1.isEmpty ? .secondary:appearance.currentTheme.vibrantColors[0])
+                        .frame(width: 7, height: 7)
+                        .padding(5)
+                    Spacer()
+                    Circle()
+                        .fill(input2.isEmpty ? .secondary:appearance.currentTheme.vibrantColors[0])
+                        .frame(width: 7, height: 7)
+                        .padding(5)
+                    Spacer()
+                    Circle()
+                        .fill(input3.isEmpty ? .secondary:appearance.currentTheme.vibrantColors[0])
+                        .frame(width: 7, height: 7)
+                        .padding(5)
+                    Spacer()
+                    Circle()
+                        .fill(input4.isEmpty ? .secondary:appearance.currentTheme.vibrantColors[0])
+                        .frame(width: 7, height: 7)
+                        .padding(5)
+                    Spacer()
+                }
+                .verticalPadding(20)
+                
+                Spacer()
+            }
+        }
+    }
+}
+
+struct PasscodeButton: View {
+    
+    var num: String
+    var action: () -> ()
+    
+    var body: some View {
+        Button {
+            
+        } label: {
+            Text(num)
+                .font(.largeTitle.bold())
+                .roundedFont()
+                .padding(10)
+                .background(Color.secondary.opacity(0.1))
+                .clipShape(.rect(cornerRadius: 14, style: .continuous))
+        }
+    }
 }

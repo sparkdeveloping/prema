@@ -488,7 +488,7 @@ struct CustomTextField: View {
                 SecureField(placeHolder, text: $text)
             }
         }
-        .foregroundStyle(.primary)
+        .foregroundStyle(text.isEmpty ? .secondary:.primary)
         .overlay(alignment: .trailing) {
             if placeHolder == "Password" {
                 Image(systemName: showPassword ? "eye.slash.fill":"eye.fill")
@@ -506,9 +506,9 @@ struct CustomTextField: View {
 }
 
 struct CustomPickerView: View {
-    @Binding var selection: String?
+    @Binding var selection: String
     var imageName = "Filter"
-    var selectTitle = "Select Category"
+    var selectTitle = ""
     @Environment(\.colorScheme) var colorScheme
     @StateObject var appearance = AppearanceManager.shared
     var categories: [String]
@@ -527,12 +527,12 @@ struct CustomPickerView: View {
                     .frame(width: 20, height: 20)
                     .padding(8)
                     .nonVibrantSecondaryBackground(cornerRadius: 10, colorScheme: colorScheme)
-                Text(selection == nil ? selectTitle:selection!.capitalized)
+                Text(!selectTitle.isEmpty ? selectTitle:selection.capitalized)
                 Spacer()
             }
             .contentShape(.rect)
         }
-        .foregroundStyle(.primary)
+        .foregroundStyle(selection == selectTitle ? .secondary:.primary)
 
     }
 }
@@ -584,11 +584,43 @@ extension Text {
 }
 
 extension View {
-    func nonVibrantBackground(cornerRadius: Double, colorScheme: ColorScheme) -> some View {
-        return background(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            .fill(colorScheme == .light ? AppearanceManager.shared.currentTheme .nonVibrantGradient:AppearanceManager.shared.currentTheme .nonVibrantSecondaryGradientDark)            .shadow(color: Color("Shadoww"), radius: 40, x: 4, y: 10))
+    func nonVibrantBlurBackground(cornerRadius: Double, colorScheme: ColorScheme) -> some View {
+        return background(        Color.clear
+            .background {
+            TransparentBlurView()
+                .blur(radius: 10)
+                .padding(-20)
+                .overlay {
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous).fill(colorScheme == .light ? AppearanceManager.shared.currentTheme .nonVibrantGradient:AppearanceManager.shared.currentTheme .nonVibrantSecondaryGradientDark)
+                        .opacity(0.5)
+                }
+                .clipShape(.rect(cornerRadius: cornerRadius, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous).stroke(Color.secondary, style: .init(lineWidth: 2)).opacity(0.05))
+                //            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+//                .fill(colorScheme == .light ? AppearanceManager.shared.currentTheme .nonVibrantGradient:AppearanceManager.shared.currentTheme .nonVibrantSecondaryGradientDark)
+                .shadow(color: Color("Shadoww"), radius: 40, x: 4, y: 10)
+        }
 
-        
+        )
+    }
+    func nonVibrantBackground(cornerRadius: Double, colorScheme: ColorScheme) -> some View {
+        return background(        Color.clear
+            .background {
+            TransparentBlurView()
+                .blur(radius: 10)
+                .padding(-20)
+                .overlay {
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous).fill(colorScheme == .light ? AppearanceManager.shared.currentTheme .nonVibrantGradient:AppearanceManager.shared.currentTheme .nonVibrantSecondaryGradientDark)
+                        .opacity(0.5)
+                }
+                .clipShape(.rect(cornerRadius: cornerRadius, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous).stroke(Color.secondary, style: .init(lineWidth: 2)).opacity(0.05))
+                //            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+//                .fill(colorScheme == .light ? AppearanceManager.shared.currentTheme .nonVibrantGradient:AppearanceManager.shared.currentTheme .nonVibrantSecondaryGradientDark)
+                .shadow(color: Color("Shadoww"), radius: 40, x: 4, y: 10)
+        }
+
+        )
     }
     func nonVibrantSecondaryBackground(cornerRadius: Double, colorScheme: ColorScheme) -> some View {
         return background(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)

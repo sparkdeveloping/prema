@@ -76,13 +76,15 @@ struct MainNavigationView: View {
 
 struct TabButton: View {
     enum TabButtonType {
-        case create, normal
+        case create, normal, alert
     }
     var type: TabButtonType {
         switch navigationManager.selectedTab {
         case .profile:
             if navigationManager.selectedSelfTab == "Heart" && imageName == "Heart" {
                 return .create
+            } else if imageName == "Heart" {
+                return .alert
             }
        
         case .direct:
@@ -97,7 +99,6 @@ struct TabButton: View {
             return .normal
         }
         return .normal
-  
     }
     var imageName: String
 
@@ -105,7 +106,28 @@ struct TabButton: View {
     @EnvironmentObject var appearance: AppearanceManager
 
     @StateObject var navigationManager = NavigationManager.shared
+    @StateObject var selfManager = SelfManager.shared
 
+    var notificationCount: Int {
+        return selfManager.visions.map({$0.tasks.filter({$0.completionTimestamp == nil })}).count
+    }
+    
+    func notificationTextBubble(color: Color = .red) -> some View {
+        return ZStack {
+                Text("\(notificationCount)")
+                .font(.title3.bold())
+                .padding(7)
+                .horizontalPadding()
+                .foregroundStyle(.white)
+                .background {
+                    color
+                    .matchedGeometryEffect(id: "namespace", in: namespace)
+                }
+                .clipShape(.rect(cornerRadius: 14, style: .continuous))
+            
+        }
+    }
+    
     var foreground: Color {
         switch navigationManager.selectedTab {
         case .profile:
@@ -202,6 +224,8 @@ struct TabButton: View {
                         }
                     
                     
+                } else if type == .alert && notificationCount > 0 {
+                    notificationTextBubble()
                 } else {
                     
                     Image(imageName)
@@ -224,43 +248,57 @@ struct Sidebar: View {
     @Environment (\.colorScheme) var colorScheme
     @Namespace var namespace
     @StateObject var accountManager = AccountManager.shared
+    @StateObject var selfManager = SelfManager.shared
     @EnvironmentObject var appearance: AppearanceManager
     @EnvironmentObject var navigation: NavigationManager
 
+    func notificationTextBubble(tab: Tab, count: Int = 0, color: Color = .red) -> some View {
+        return ZStack {
+            if count > 0 {
+                Text("\(count)")
+                    .font(.caption.bold())
+                    .padding(4)
+                    .horizontalPadding(4)
+                    .background(navigation.selectedTab == tab ? .white:color)
+                    .foregroundStyle(navigation.selectedTab == tab ? color:.white)
+                    .clipShape(.rect(cornerRadius: 12, style: .continuous))
+                
+            }
+        }
+    }
+    
     var body: some View {
         VStack {
             Spacer()
-            HStack {
-                Image("FullName")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 20, height: 20)
-                    .padding(7)
-                    .nonVibrantSecondaryBackground(cornerRadius: 12, colorScheme: colorScheme)
-                Text("Self")
-                    .bold()
-                    .roundedFont()
-                Spacer()
-            }
-            .foregroundStyle(selectedTab == .profile ? .white:.primary)
-            .padding(7)
-            .background {
-                if selectedTab == .profile {
-                    Color.clear
-                        .vibrantBackground(cornerRadius: 14, colorScheme: colorScheme)
-                        .matchedGeometryEffect(id: "namespace", in: namespace)
-                } else {
-                    Color.clear.nonVibrantBackground(cornerRadius: 20, colorScheme: colorScheme)
+            if let profile = accountManager.currentProfile {
+                HStack {
+                    ProfileImageView(avatars: profile.avatars)
+                        .frame(width: 27, height: 27)
+                    Text(profile.fullName.formattedName(from: []))
+                        .bold()
+                        .roundedFont()
+                    Spacer()
+                    notificationTextBubble(tab: .profile, count: selfManager.visions.map({$0.tasks.filter({$0.completionTimestamp == nil })}).count)
+                }
+                .foregroundStyle(selectedTab == .profile ? .white:.primary)
+                .padding(7)
+                .background {
+                    if selectedTab == .profile {
+                        Color.clear
+                            .vibrantBackground(cornerRadius: 14, colorScheme: colorScheme)
+                            .matchedGeometryEffect(id: "namespace", in: namespace)
+                    } else {
+                        Color.clear.nonVibrantBackground(cornerRadius: 20, colorScheme: colorScheme)
+                    }
+                }
+                .bottomPadding()
+                .onTapGesture {
+                    withAnimation(.spring()) {
+                        selectedTab = .profile
+                        navigation.showSidebar = false
+                    }
                 }
             }
-            .bottomPadding()
-            .onTapGesture {
-                withAnimation(.spring()) {
-                    selectedTab = .profile
-                    navigation.showSidebar = false
-                }
-            }
-            
             VStack {
                 ForEach(Tab.allCases, id: \.self) { tab in
                     HStack {
@@ -273,7 +311,11 @@ struct Sidebar: View {
                             .bold()
                             .roundedFont()
                         Spacer()
-                    }.foregroundStyle(selectedTab == tab ? .white:Color.primary)
+                        if tab == .direct {
+                            notificationTextBubble(tab: tab, count: 1)
+                        }
+                    }
+                    .foregroundStyle(selectedTab == tab ? .white:Color.primary)
                     .padding(7)
                     .contentShape(.rect)
                     .onTapGesture {
@@ -292,7 +334,8 @@ struct Sidebar: View {
                     }
                 }
             }
-            .buttonPadding()
+            .verticalPadding()
+            .horizontalPadding(5)
             .nonVibrantBackground(cornerRadius: 20, colorScheme: colorScheme)
             HStack {
                 Image("Camera")
