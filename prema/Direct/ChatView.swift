@@ -1484,11 +1484,13 @@ struct ChatTextField: View {
                             Text(inbox.name)
                                 .bold()
                                 .roundedFont()
-                            Text("\(statusViewModel.statusText)")
-                                .font(.subheadline.italic())
-                                .bold()
-                                .roundedFont()
-                                .foregroundStyle(statusViewModel.statusColor)
+                            if (inbox.isGroup &&  !statusViewModel.online.isEmpty || !statusViewModel.inChat.isEmpty || !statusViewModel.typing.isEmpty) || !inbox.isGroup {
+                                Text("\(statusViewModel.statusText)")
+                                    .font(.subheadline.italic())
+                                    .bold()
+                                    .roundedFont()
+                                    .foregroundStyle(statusViewModel.statusColor)
+                            }
                         }
                         ProfileImageView(avatarImageURL: inbox.avatar)
                             .frame(width: 40, height: 40)
