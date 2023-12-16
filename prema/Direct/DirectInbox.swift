@@ -78,7 +78,7 @@ struct InboxCell: View {
     @Namespace var namespace
     @ObservedObject var inbox: Inbox
     @Binding var selection: Inbox?
-    @StateObject var viewModel = ActivityStatusManager.shared
+    @StateObject var viewModel = ActivityStatusManager()
     var inboxChangedOnlineHandle: DatabaseHandle!
     var inboxChangedProfileHandle: DatabaseHandle!
     var inboxChangedMessageHandle: DatabaseHandle!

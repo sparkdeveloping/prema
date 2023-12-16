@@ -101,9 +101,9 @@ class ChatManager: ObservableObject {
             case .regular:
                 break
             case .sensitive:
-                ts = Date.now.timeIntervalSince1970 + 180
+                ts = 180
             case .destructive:
-                ts = Date.now.timeIntervalSince1970 + 180
+                ts = 180
             }
             
           
@@ -133,6 +133,7 @@ class ChatManager: ObservableObject {
                     self.finalizeMessage(id: id, inbox: inbox, inboxDict: inboxDict, messageDict: messageDict)
                 } onError: { error in
                     message.isMessageSendError = true
+                    message.isMessageSendError = true
                 }
 
             }
@@ -142,8 +143,20 @@ class ChatManager: ObservableObject {
             self.inbox = inboxDict.parseInbox()
             self.selectedMessage = nil
             self.reply = nil
+            self.sticker = nil
         }
     }
+    
+    func openedMessage(_ message: Message) {
+        guard let profile = AccountManager.shared.currentProfile else { return }
+        let timestamp = Timestamp(profile: profile, time: Date.now.timeIntervalSince1970)
+        Ref.firestoreDb.collection("inbox").document(inbox.id).collection("messages").document(message.id).updateData([
+            "opened": FieldValue.arrayUnion([timestamp.dictionary])
+        ])
+
+        
+    }
+    
     
     func finalizeMessage(id: String, inbox: Inbox, inboxDict: [String: Any], messageDict: [String: Any]) {
         let batch = db.batch()

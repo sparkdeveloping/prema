@@ -80,6 +80,7 @@ struct ChatView: View {
                 ZStack {
                     if chatManager.selection == "chat" {
                         MessagesView(namespace: _namespace)
+                            .environmentObject(statusViewModel)
                             .environmentObject(chatManager)
                             .opacity(chatManager.reply == nil ? 1:0.1)
                             .ignoresSafeArea()
@@ -196,17 +197,34 @@ struct MessagesView: View {
     @Namespace var namespace
     
     
-    
+    @EnvironmentObject var statusViewModel: ActivityStatusManager
+
     var body: some View {
         GeometryReader { proxy in
             List {
+            
                 LazyVStack {
+                    if !statusViewModel.typing.isEmpty || (chatManager.inbox.isGroup && statusViewModel.statusText == "typing...") {
+                        HStack {
+                            Text(statusViewModel.statusText)
+                                .font(.subheadline.bold())
+                                .roundedFont()
+                            Spacer()
+                        }
+                        .listRowBackground(Color.clear)
+
+                        .padding(.leading, 20)
+                        .verticalPadding()
+                            .rotationEffect(.radians(.pi))
+                    }
                     ForEach(chatManager.messages) { message in
                         ChatBubble(message: message, namespace: _namespace)
-                            
+                            .animation(.easeInOut(duration: 0.3), value: chatManager.messages)
                             .matchedGeometryEffect(id: "chat-bubble-\(message.id)", in: namespace)
                             .listRowBackground(Color.clear)
+                        
                     }
+                    
                 }
                 .padding(.bottom, Double.blobHeight - safeAreaInsets.top)
                 .padding(.top, safeAreaInsets.bottom + 50 + (chatManager.reply?.frame.height ?? 0))
@@ -214,6 +232,7 @@ struct MessagesView: View {
             }
             .scrollContentBackground(.hidden)
             .listStyle(.plain)
+            .listRowSeparator(.hidden)
             .scrollIndicators(.hidden)
             .scrollDismissesKeyboard(.interactively)
             .rotationEffect(Angle(degrees: 180))
@@ -259,7 +278,7 @@ struct ChatBubble: View {
     var inbox: Inbox {
         return viewModel.inbox
     }
-    
+    @State var animateShow = false
     var body: some View {
         VStack {
             
@@ -431,10 +450,18 @@ struct ChatBubble: View {
                     
                   
                     if viewModel.messages.first?.id == message.id && message.timestamp.profile.id == AccountManager.shared.currentProfile?.id  && !message.isReply {
-                        Text(message.timestamp.time.chatTime)
-                            .font(.caption)
-                            .padding(.horizontal, 10)
-                            .opacity(viewModel.selectedMessage == nil ? 1:0.1)
+                        HStack {
+                            Text(message.timestamp.time.chatTime)
+                                .font(.caption)
+                              
+                            if !message.opened.isEmpty {
+                                Text(" ・ \(viewModel.inbox.isGroup ?  "\(message.opened.count)":"read")")
+                                    .font(.caption)
+                            }
+                            
+                        }
+                        .padding(.horizontal, 10)
+                        .opacity(viewModel.selectedMessage == nil ? 1:0.1)
                     }
             
                 }
@@ -448,7 +475,17 @@ struct ChatBubble: View {
         }
         .rotationEffect(Angle(degrees: 180))
 //        .opacity(message.isSent ? 1:0.5)
-        
+        .offset(x: animateShow ? 0:(fromMe ? -AppearanceManager.shared.size.width:AppearanceManager.shared.size.width))
+        .opacity(animateShow ? 1:0)
+        .animation(.spring(response: 0.5), value: animateShow)
+        .onAppear {
+            animateShow = true
+          
+            viewModel.openedMessage(message)
+        }
+        .onDisappear {
+            animateShow = false
+        }
     }
     
     var fromColors: [Color] {
@@ -756,6 +793,7 @@ struct ChatContextView: View {
                             .onTapGesture {
                                 withAnimation(.spring()) {
                                     viewModel.deleteMessage()
+                                    viewModel.selectedMessage = nil
                                 }
                             }
                         
@@ -798,7 +836,8 @@ struct ChatInputView: View {
     @EnvironmentObject var viewModel: ChatManager
     @Environment (\.safeAreaInsets) var safeAreaInsets
     @Environment (\.colorScheme) var colorScheme
-    
+    @Environment(\.scenePhase) var scenePhase
+
     @StateObject private var audioRecorder: AudioRecorder = AudioRecorder()
     @StateObject private var audioPlayerManager: AudioPlayerManager = AudioPlayerManager()
     @StateObject private var statusObserver = TypingObserver()
@@ -992,6 +1031,7 @@ struct ChatInputView: View {
                 }
             }
             .verticalPadding(5)
+            .horizontalPadding()
 //            .background(.regularMaterial)
             .clipShape(.rect(cornerRadius: 20, style: .continuous))
             .nonVibrantBlurBackground(cornerRadius: 20, colorScheme: colorScheme)
@@ -1016,6 +1056,19 @@ struct ChatInputView: View {
                 
                 self.isFocused = newValue != nil
                 
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active {
+                    statusObserver.handleInChat(bool: true, inbox: inbox)
+                } else if newPhase == .inactive {
+                    print("Inactive")
+                    statusObserver.handleInChat(bool: false, inbox: inbox)
+                    AccountManager.shared.updateInboxStatus(to: [inbox], typing: false)
+                } else if newPhase == .background {
+                    statusObserver.handleInChat(bool: false, inbox: inbox)
+                    statusObserver.handleTyping($0, inbox: inbox)
+                    AccountManager.shared.updateInboxStatus(to: [inbox], typing: false)
+                }
             }
             .contextMenu {
                 Button("Regular") {
