@@ -623,7 +623,7 @@ struct CustomSelectorView: View {
 
 
 extension Double {
-    func formattedDateString(format: String = "h:mm a", showTime: Bool = false) -> String {
+    func formattedDateString(format: String? = nil, showTime: Bool = false) -> String {
         let dateFormatter = DateFormatter()
         let dateFormatter2 = DateFormatter()
         dateFormatter.locale = Locale(identifier: "en_US_POSIX")
@@ -635,13 +635,13 @@ extension Double {
         let inputDate = Date(timeIntervalSince1970: self)
         
         if Calendar.current.isDateInToday(inputDate) {
-            dateFormatter.dateFormat = "'Today'"
+            dateFormatter.dateFormat = format == nil ? "'Today'":format
         } else if Calendar.current.isDateInTomorrow(inputDate) {
-            dateFormatter.dateFormat = "'Tomorrow'"
+            dateFormatter.dateFormat = format == nil ? "'Tomorrow'":format
         } else if Calendar.current.isDateInYesterday(inputDate) {
-            dateFormatter.dateFormat = "'Yesterday'"
+            dateFormatter.dateFormat = format == nil ? "'Yesterday'":format
         } else {
-            dateFormatter.dateFormat = "MM/dd/yy"
+            dateFormatter.dateFormat = format == nil ? "MM/dd/yy":format
         }
 
         let formattedDate = dateFormatter.string(from: inputDate)

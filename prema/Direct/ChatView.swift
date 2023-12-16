@@ -960,7 +960,7 @@ struct ChatInputView: View {
                             Spacer()
                             HStack {
                                 if audioRecorder.isRecording {
-                                    Text(audioRecorder.recordingTime.chatTime)
+                                    Text(audioRecorder.recordingTime.formattedDateString(format: "h:mm:s"))
                                         .font(.system(size: 22))
                                         .shadow(color: .background, radius: 10, x: 0, y: 0)
                                     Image(systemName: "stop.fill")
@@ -1418,10 +1418,10 @@ struct SliderX: View {
                             .onTapGesture {
                                 viewModel.play()
                             }
-                        Text(viewModel.currentTime.chatTime)
+                        Text(viewModel.currentTime.formattedDateString(format: "h:mm:s"))
                             .font(.caption)
                         Spacer()
-                        Text(viewModel.duration.chatTime)
+                        Text(viewModel.duration.formattedDateString(format: "h:mm:s"))
                             .font(.caption)
 //                            .timestamp()
                     }
