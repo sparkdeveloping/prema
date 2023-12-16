@@ -74,6 +74,8 @@ struct ChatView: View {
     }
     var body: some View {
         ZStack {
+            Color.background
+                .ignoresSafeArea()
             GeometryReader {
                 let size = $0.size
                 
