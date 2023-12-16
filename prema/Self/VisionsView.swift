@@ -68,11 +68,14 @@ struct VisionsView: View {
                     Spacer()
                     VStack(alignment: .trailing) {
                         Text("Today is")
-                            .font(.largeTitle)
+                            .font(.largeTitle.bold())
                             .foregroundStyle(.primary)
-                        Text(Date.now.formatted())
-                            .font(.title.bold())
+                            .roundedFont()
+                        
+                        Text(Date.now.timeIntervalSince1970.formattedDateString(format: "EEEE, MMM d"))
+                            .font(.subheadline.bold())
                             .foregroundStyle(.secondary)
+                            .roundedFont()
                     }
                     .buttonPadding(20)
 //                    .nonVibrantBackground(cornerRadius: 20, colorScheme: colorScheme)
@@ -620,12 +623,11 @@ struct CustomSelectorView: View {
 
 
 extension Double {
-    func formattedDateString(showTime: Bool = false) -> String {
+    func formattedDateString(format: String = "h:mm a", showTime: Bool = false) -> String {
         let dateFormatter = DateFormatter()
         let dateFormatter2 = DateFormatter()
         dateFormatter.locale = Locale(identifier: "en_US_POSIX")
 
-        
         dateFormatter2.dateFormat = "h:mm a"
         let time = dateFormatter2.string(from: self.date)
         

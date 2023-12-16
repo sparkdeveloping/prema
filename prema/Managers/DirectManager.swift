@@ -258,23 +258,29 @@ class ActivityStatusManager: ObservableObject {
         
         if typingCount > 1 {
             return "\(typingCount) typing..."
-        } else if typingCount == 1 {
-            return typing[0].fullName.formattedName(from: typing.map {$0.fullName}) + " & " +  typing[1].fullName.formattedName(from: typing.map {$0.fullName}) + " typing..."
-        } else if typingCount == 1 {
+        } 
+//        else if typingCount == 1 {
+//            return typing[0].fullName.formattedName(from: typing.map {$0.fullName}) + " & " +  typing[1].fullName.formattedName(from: typing.map {$0.fullName}) + " typing..."
+//        } 
+        else if typingCount == 1 {
             return "typing..."
         }
         if inChatCount > 1 {
             return "\(inChatCount) active"
-        } else if inChatCount == 1 {
-            return inChat[0].fullName.formattedName(from: inChat.map {$0.fullName}) + " & " +  inChat[1].fullName.formattedName(from: inChat.map {$0.fullName}) + " active"
-        } else if inChatCount == 1 {
+        }
+//        else if inChatCount == 1 {
+//            return inChat[0].fullName.formattedName(from: inChat.map {$0.fullName}) + " & " +  inChat[1].fullName.formattedName(from: inChat.map {$0.fullName}) + " active"
+//        } 
+        else if inChatCount == 1 {
             return "active"
         }
         if onlineCount > 1 {
             return "\(onlineCount) online"
-        } else if onlineCount == 1 {
-            return online[0].fullName.formattedName(from: online.map {$0.fullName}) + " & " +  online[1].fullName.formattedName(from: online.map {$0.fullName}) + " online"
-        } else if onlineCount == 1 {
+        } 
+//        else if onlineCount == 1 {
+//            return online[0].fullName.formattedName(from: online.map {$0.fullName}) + " & " +  online[1].fullName.formattedName(from: online.map {$0.fullName}) + " online"
+//        }
+        else if onlineCount == 1 {
             return "online"
         }
         return "offline"
