@@ -454,7 +454,7 @@ struct ChatBubble: View {
                             Text(message.timestamp.time.chatTime)
                                 .font(.caption)
                               
-                            if !message.opened.isEmpty {
+                            if message.opened.count > 1 {
                                 Text(" ・ \(viewModel.inbox.isGroup ?  "\(message.opened.count)":"read")")
                                     .font(.caption)
                             }

@@ -27,42 +27,83 @@ struct DirectInbox: View {
     //    @Namespace var global_namespace
     
     @StateObject var directManager: DirectManager = .shared
+    @StateObject var accountManager: AccountManager = .shared
+    @StateObject var appearance: AppearanceManager = .shared
+    @StateObject var authManager = AuthManager()
     @StateObject var navigation: NavigationManager = .shared
+    @Environment (\.colorScheme) var colorScheme
     @Environment (\.safeAreaInsets) var safeAreaInsets
     @StateObject var namespace = NamespaceWrapper.shared
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 5) {
-                
-                CustomSelectorView(selection: $directManager.selectedDirectMode, strings: [
-                    "all",
-                    "groups",
-                    "communications",
-                    "proxy",
-                    "requests"
-                ])
-                
-                ForEach(directManager.inboxes) { inbox in
+        ZStack {
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 5) {
                     
-                    InboxCell(inbox: inbox, selection: $selection)
+                    CustomSelectorView(selection: $directManager.selectedDirectMode, strings: [
+                        "all",
+                        "groups",
+                        "communications",
+                        "proxy",
+                        "requests"
+                    ])
+                    
+                    ForEach(directManager.inboxes) { inbox in
+                        
+                        InboxCell(inbox: inbox, selection: $selection)
+                    }
+                    
+                    
                 }
-                
-                
+                //            .background(Color(.systemBackground))
+                //            .shadow(color: .shadow, radius: 10, x: 0, y: -10)
+                .padding(.bottom, 50)
+                .padding(.top, Double.blobHeight - safeAreaInsets.top)
             }
-//            .background(Color(.systemBackground))
-//            .shadow(color: .shadow, radius: 10, x: 0, y: -10)
-            .padding(.bottom, 50)
-            .padding(.top, Double.blobHeight - safeAreaInsets.top)
-        }
-        .ignoresSafeArea()
-        .simultaneousGesture(
-            TapGesture()
-                .onEnded { _ in
-                    withAnimation(.spring(response: 0.4)) {
-                        selection = nil
+            .ignoresSafeArea()
+            .simultaneousGesture(
+                TapGesture()
+                    .onEnded { _ in
+                        withAnimation(.spring(response: 0.4)) {
+                            selection = nil
+                        }
+                    }
+            )
+            VStack {
+                HStack {
+                    Spacer()
+                    if let currentAccount = accountManager.currentAccount {
+                        Menu {
+                            ForEach(currentAccount.profiles) { profile in
+                                Button(profile.username) {
+                                    do {
+                                        try Auth.auth().signOut()
+                                        if let password = currentAccount.password {
+                                            authManager.login(email: currentAccount.email, password: password) {
+                                                withAnimation(.spring()) {
+                                                    AccountManager.shared.currentProfile = profile
+                                                }
+                                                appearance.stopLoading()
+                                                DirectManager.shared = .init()
+                                            }
+                                        }
+                                    } catch {}
+                                }
+                            }
+                        } label: {
+                            Text("@" + (accountManager.currentProfile?.username ?? ""))
+                                .bold()
+                                .foregroundStyle(Color.vibrant)
+                                .buttonPadding(20)
+                                .nonVibrantBackground(cornerRadius: 20, colorScheme: colorScheme)
+                            
+                        }
                     }
                 }
-        )
+                .padding()
+                Spacer()
+                
+            }
+        }
         .sheet(isPresented: $navigation.showNewInbox) {
             
             ProfileSearchView() { profiles in

@@ -258,7 +258,24 @@ class ActivityStatusManager: ObservableObject {
         
         if typingCount > 1 {
             return "\(typingCount) typing..."
-        } 
+        }
+        if inChatCount > 1 {
+            return "\(typingCount) active"
+        }
+        if onlineCount > 1 {
+            return "\(typingCount) online"
+        }
+        if typingCount == 1 {
+            return "typing..."
+        }
+        if inChatCount == 1 {
+            return "active"
+        }
+        if onlineCount == 1 {
+            return "online"
+        }
+        return status
+        /*
 //        else if typingCount == 1 {
 //            return typing[0].fullName.formattedName(from: typing.map {$0.fullName}) + " & " +  typing[1].fullName.formattedName(from: typing.map {$0.fullName}) + " typing..."
 //        } 
@@ -284,6 +301,7 @@ class ActivityStatusManager: ObservableObject {
             return "online"
         }
         return "offline"
+         */
     }
     
     
