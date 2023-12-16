@@ -1066,7 +1066,6 @@ struct ChatInputView: View {
                     AccountManager.shared.updateInboxStatus(to: [inbox], typing: false)
                 } else if newPhase == .background {
                     statusObserver.handleInChat(bool: false, inbox: inbox)
-                    statusObserver.handleTyping($0, inbox: inbox)
                     AccountManager.shared.updateInboxStatus(to: [inbox], typing: false)
                 }
             }
