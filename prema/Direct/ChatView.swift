@@ -236,7 +236,7 @@ struct MessagesView: View {
             .scrollIndicators(.hidden)
             .scrollDismissesKeyboard(.interactively)
             .rotationEffect(Angle(degrees: 180))
-            .background(Color.nonVibrant(colorScheme))
+            .background(Color.nonVibrantSecondary(colorScheme))
             .scrollContentBackground(.hidden)
             .keyboardAware()
         }

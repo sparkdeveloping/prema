@@ -120,7 +120,7 @@ class SelfManager: ObservableObject {
                 "visionaries":vision.visionaries.map { $0.dictionary },
                 "timestamps":[Date.now.timeIntervalSince1970],
                 "accepts":[profile.id],
-                "requests":vision.visionaries.filter {$0.id != profile.id }
+                "requests":vision.visionaries.filter {$0.id != profile.id }.map {$0.id}
             ]) { error in
                 if let error {
                     
